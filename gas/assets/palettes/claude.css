@@ -1,0 +1,42 @@
+/* "Claude" - GAS's original palette (unchanged from before the palette
+   system existed, moved into its own file to match every other one). Its
+   dark face has no real-world source to match, so it's a straightforward
+   dark reading of the same accent rather than something sampled. */
+
+[data-palette="claude"] {
+  --bg: #f6f6f4;
+  --panel: #ffffff;
+  --card: var(--bg);
+  --sidebar: #1e1f22;
+  --sidebar-text: #b9bbbe;
+  --sidebar-active: #ffffff;
+  --text: #24262b;
+  --muted: #6b7078;
+  --border: #e3e3df;
+  --accent: #714b67;
+  --accent-soft: #f4eff3;
+  --accent-light: #c9a3c0;
+  --pink: #ff70a6;
+  --cyan: #03bcae;
+  --yellow: #e0b400;
+  --lavender: #9d7ab8;
+}
+
+[data-palette="claude"][data-theme="dark"] {
+  --bg: #202124;
+  --panel: #292a2e;
+  --card: var(--bg);
+  --sidebar: #1e1f22;
+  --sidebar-text: #b9bbbe;
+  --sidebar-active: #ffffff;
+  --text: #e7e3e6;
+  --muted: #9a9ba0;
+  --border: #3a3b40;
+  --accent: #c9a3c0;
+  --accent-soft: #3a2f38;
+  --accent-light: #dcbfd4;
+  --pink: #ff70a6;
+  --cyan: #03bcae;
+  --yellow: #e0b400;
+  --lavender: #9d7ab8;
+}

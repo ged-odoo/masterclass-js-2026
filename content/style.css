@@ -1,0 +1,147 @@
+/* This project's own tweaks, loaded after gas/assets/style.css - see
+   gas/README.md. Everything below is specific to a page this project
+   itself adds (sections/81-odoosh/odoosh.html), not part of GAS. */
+
+/* ---------- the display face on every title ---------- */
+
+/* Branding, the same call the two talks make: Caveat carries every slide
+   title, so the masterclass and the talks read as one set. Three things have
+   to move with the family - it only ships a bold, its x-height is far
+   smaller than Geist's at the same size, so the sizes go up to match, and
+   the tracking Geist was tightened by has to come back off. */
+.clean .slide h2 {
+  font-family: "Caveat", ui-rounded, cursive;
+  font-size: max(28px, calc(5.8cqw * var(--content-scale, 1)));
+  font-weight: 700;
+  line-height: 1.06;
+  letter-spacing: 0;
+}
+
+.clean .statement h2 {
+  font-size: max(34px, calc(7.4cqw * var(--content-scale, 1)));
+}
+
+/* after .statement, which a cover also is */
+.clean .cover h2 {
+  font-size: max(42px, calc(9cqw * var(--content-scale, 1)));
+}
+
+#view-odoosh { max-width: 700px; }
+
+#view-odoosh .lead {
+  margin: 0 0 20px;
+  font-size: 17px;
+  color: var(--muted);
+}
+
+#view-odoosh li { margin-bottom: 8px; }
+
+/* the lifecycle's two nested pairs: setup/onWillDestroy on the outside,
+   onMounted/onWillUnmount within it. Colour is the whole explanation, so it
+   goes on those four boxes and nothing else. */
+#deck-owl .figure .bx.open {
+  fill: #e6f1e8;
+  stroke: #7fb896;
+}
+
+#deck-owl .figure .bx.mount {
+  fill: #fdf0dd;
+  stroke: #d3a45e;
+}
+
+[data-theme="dark"] #deck-owl .figure .bx.open {
+  fill: #1c3326;
+  stroke: #4f8f68;
+}
+
+[data-theme="dark"] #deck-owl .figure .bx.mount {
+  fill: #35291a;
+  stroke: #91743f;
+}
+
+/* the web client tree shares its slide with the template that produces it, so
+   it is drawn at the width of its own column. The width carries
+   --content-scale, or the figure is dead weight the auto-fit cannot compress */
+#deck-js-framework .figure.webclient {
+  width: calc(46cqw * var(--content-scale, 1));
+  margin: 0 auto;
+}
+
+/* ---------- a wider sidebar ---------- */
+
+/* This deck's nav runs deeper than the talks' - every topic lists its
+   presentation and its exercises - so the 300px GAS rail wraps entries that
+   should sit on one line. Only the wide layout moves; below 720px the
+   sidebar is a full-width bar and GAS's own rule still governs. */
+@media (min-width: 721px) {
+  .sidebar {
+    width: 340px;
+    flex-basis: 340px;
+  }
+}
+
+/* ---------- Owl 2 vs Owl 3: the vocabulary ---------- */
+
+/* The chips come with the slide, copied from the talk this deck's
+   comparisons come from (talk1-introducing-owl3/style.css). The talk's own
+   copy reads --line/--card/--quiet/--ink, which only the clean system
+   defines - this deck is the plainer one, so these read the palette's own
+   tokens instead. */
+#deck-owl-2-vs-3 .vocab {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 2.6cqw;
+}
+
+#deck-owl-2-vs-3 .chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  gap: 0.7cqw;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+#deck-owl-2-vs-3 .chips li {
+  margin: 0;
+  padding: 0.6cqw 1cqw;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: max(10px, 1.45cqw);
+  line-height: 1.2;
+}
+
+#deck-owl-2-vs-3 .chips.gone li {
+  border-color: var(--border);
+  background: var(--bg);
+  color: var(--muted);
+  text-decoration: line-through;
+  text-decoration-thickness: 1px;
+}
+
+#deck-owl-2-vs-3 .chips.new li {
+  border-color: var(--accent-light);
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+/* a rename is one chip, not two: the arrow carries the accent */
+#deck-owl-2-vs-3 .chips.changed li {
+  border-color: var(--border);
+  background: var(--panel);
+  color: var(--text);
+}
+
+#deck-owl-2-vs-3 .chips .to {
+  padding: 0 0.2cqw;
+  color: var(--accent);
+}
+
+/* a name that stayed while its contract moved: the note says what changed */
+#deck-owl-2-vs-3 .chips .note {
+  font-family: "Geist", ui-sans-serif, system-ui, sans-serif;
+  font-size: 0.86em;
+  color: var(--muted);
+}

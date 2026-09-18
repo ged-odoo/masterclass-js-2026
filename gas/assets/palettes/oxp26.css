@@ -1,0 +1,51 @@
+/* "OXP26" - taken directly from Odoo Experience 2026's own speaker
+   template (a Google Slides deck): its 5-colour swatch, sampled pixel-exact
+   from the actual rendered slide, not eyeballed - #8d3b71 is also literally
+   what a straight/curved arrow's stroke renders as there. --pink/--cyan/
+   --yellow/--lavender are that swatch's other 4 colours, for the
+   highlighter/mark language in style.css - constant across light and dark
+   alike (marker colours sit ON a surface, they don't need to adapt to
+   one). The dark --bg (#21272b) is likewise real, not invented - it's the
+   one dark surface the template itself actually uses, on its own
+   code-sample slides. */
+
+[data-palette="oxp26"] {
+  --bg: #f3f4f6;
+  --panel: #ffffff;
+  /* the real template's own boxes/cards are flat white with just a border,
+     not a shaded fill - --card matching --panel (not --bg, unlike claude's
+     softer grey card) is what keeps that look here */
+  --card: var(--panel);
+  --sidebar: #1e1f22;
+  --sidebar-text: #b9bbbe;
+  --sidebar-active: #ffffff;
+  --text: #1c1d21;
+  --muted: #6b7078;
+  --border: #e4e5e8;
+  --accent: #8d3b71;
+  --accent-soft: #f6eff4;
+  --accent-light: #ceabc2;
+  --pink: #ff70a6;
+  --cyan: #03f9e3;
+  --yellow: #ffd433;
+  --lavender: #bb86fc;
+}
+
+[data-palette="oxp26"][data-theme="dark"] {
+  --bg: #21272b;
+  --panel: #2a3136;
+  --card: var(--panel);
+  --sidebar: #1e1f22;
+  --sidebar-text: #b9bbbe;
+  --sidebar-active: #ffffff;
+  --text: #e7e3e6;
+  --muted: #9a9ba0;
+  --border: #3a4045;
+  --accent: #bb86fc;
+  --accent-soft: #483f5f;
+  --accent-light: #d6b6fd;
+  --pink: #ff70a6;
+  --cyan: #03f9e3;
+  --yellow: #ffd433;
+  --lavender: #bb86fc;
+}

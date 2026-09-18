@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Dental Treatment -->
+        <record id="product_category_dental" model="product.category">
+            <field name="name">Dental Treatment</field>
+        </record>
+
+        <record id="root_canal_treatment" model="product.product">
+            <field name="image_1920" type="bytes" file="awesome_dental_practice/static/img/products/tooth_whole.png"/>
+            <field name="name">Root canal treatment</field>
+            <field name="list_price">900.0</field>
+            <field name="standard_price">900.0</field>
+            <field name="type">dental</field>
+            <field name="dental_care_type">tooth</field>
+            <field name="uom_id" ref="uom.product_uom_unit"/>
+            <field name="categ_id" ref="product_category_dental"/>
+        </record>
+
+        <record id="tooth_fillings" model="product.product">
+            <field name="image_1920" type="bytes" file="awesome_dental_practice/static/img/products/tooth_part.png"/>
+            <field name="name">Tooth Fillings</field>
+            <field name="list_price">180.0</field>
+            <field name="standard_price">180.0</field>
+            <field name="type">dental</field>
+            <field name="dental_care_type">part</field>
+            <field name="uom_id" ref="uom.product_uom_unit"/>
+            <field name="categ_id" ref="product_category_dental"/>
+        </record>
+
+        <record id="tooth_extractions" model="product.product">
+            <field name="image_1920" type="bytes" file="awesome_dental_practice/static/img/products/tooth_whole.png"/>
+            <field name="name">Tooth extractions</field>
+            <field name="list_price">250.0</field>
+            <field name="standard_price">250.0</field>
+            <field name="type">dental</field>
+            <field name="dental_care_type">tooth</field>
+            <field name="uom_id" ref="uom.product_uom_unit"/>
+            <field name="categ_id" ref="product_category_dental"/>
+        </record>
+
+        <record id="crown" model="product.product">
+            <field name="image_1920" type="bytes" file="awesome_dental_practice/static/img/products/tooth_whole.png"/>
+            <field name="name">Crown</field>
+            <field name="list_price">1200.0</field>
+            <field name="standard_price">1200.0</field>
+            <field name="type">dental</field>
+            <field name="dental_care_type">tooth</field>
+            <field name="uom_id" ref="uom.product_uom_unit"/>
+            <field name="categ_id" ref="product_category_dental"/>
+        </record>
+
+        <record id="teeth_whitening" model="product.product">
+            <field name="image_1920" type="bytes" file="awesome_dental_practice/static/img/products/smile_mouth.png"/>
+            <field name="name">Teeth Whitening</field>
+            <field name="list_price">350.0</field>
+            <field name="standard_price">350.0</field>
+            <field name="type">dental</field>
+            <field name="dental_care_type">mouth</field>
+            <field name="uom_id" ref="uom.product_uom_unit"/>
+            <field name="categ_id" ref="product_category_dental"/>
+        </record>
+
+        <record id="dental_implant" model="product.product">
+            <field name="image_1920" type="bytes" file="awesome_dental_practice/static/img/products/tooth_whole.png"/>
+            <field name="name">Dental Implant</field>
+            <field name="list_price">3500.0</field>
+            <field name="standard_price">3500.0</field>
+            <field name="type">dental</field>
+            <field name="dental_care_type">tooth</field>
+            <field name="uom_id" ref="uom.product_uom_unit"/>
+            <field name="categ_id" ref="product_category_dental"/>
+        </record>
+
+        <record id="dental_bridge" model="product.product">
+            <field name="image_1920" type="bytes" file="awesome_dental_practice/static/img/products/tooth_whole.png"/>
+            <field name="name">Bridge</field>
+            <field name="list_price">1800.0</field>
+            <field name="standard_price">1800.0</field>
+            <field name="type">dental</field>
+            <field name="dental_care_type">tooth</field>
+            <field name="uom_id" ref="uom.product_uom_unit"/>
+            <field name="categ_id" ref="product_category_dental"/>
+        </record>
+
+        <record id="composite_bonding" model="product.product">
+            <field name="image_1920" type="bytes" file="awesome_dental_practice/static/img/products/tooth_part.png"/>
+            <field name="name">Composite Bonding</field>
+            <field name="list_price">350.0</field>
+            <field name="standard_price">350.0</field>
+            <field name="type">dental</field>
+            <field name="dental_care_type">part</field>
+            <field name="uom_id" ref="uom.product_uom_unit"/>
+            <field name="categ_id" ref="product_category_dental"/>
+        </record>
+
+        <record id="dental_sealant" model="product.product">
+            <field name="image_1920" type="bytes" file="awesome_dental_practice/static/img/products/tooth_part.png"/>
+            <field name="name">Dental Sealant</field>
+            <field name="list_price">50.0</field>
+            <field name="standard_price">50.0</field>
+            <field name="type">dental</field>
+            <field name="dental_care_type">part</field>
+            <field name="uom_id" ref="uom.product_uom_unit"/>
+            <field name="categ_id" ref="product_category_dental"/>
+        </record>
+
+        <record id="dental_cleaning" model="product.product">
+            <field name="image_1920" type="bytes" file="awesome_dental_practice/static/img/products/smile_mouth.png"/>
+            <field name="name">Dental Cleaning</field>
+            <field name="list_price">90.0</field>
+            <field name="standard_price">90.0</field>
+            <field name="type">dental</field>
+            <field name="dental_care_type">mouth</field>
+            <field name="uom_id" ref="uom.product_uom_unit"/>
+            <field name="categ_id" ref="product_category_dental"/>
+        </record>
+
+        <record id="fluoride_treatment" model="product.product">
+            <field name="image_1920" type="bytes" file="awesome_dental_practice/static/img/products/smile_mouth.png"/>
+            <field name="name">Fluoride Treatment</field>
+            <field name="list_price">30.0</field>
+            <field name="standard_price">30.0</field>
+            <field name="type">dental</field>
+            <field name="dental_care_type">mouth</field>
+            <field name="uom_id" ref="uom.product_uom_unit"/>
+            <field name="categ_id" ref="product_category_dental"/>
+        </record>
+
+        <record id="panoramic_xray" model="product.product">
+            <field name="image_1920" type="bytes" file="awesome_dental_practice/static/img/products/smile_mouth.png"/>
+            <field name="name">Panoramic X-Ray</field>
+            <field name="list_price">120.0</field>
+            <field name="standard_price">120.0</field>
+            <field name="type">dental</field>
+            <field name="dental_care_type">mouth</field>
+            <field name="uom_id" ref="uom.product_uom_unit"/>
+            <field name="categ_id" ref="product_category_dental"/>
+        </record>
+
+        <!-- Dental Care Products: regular retail goods, not interventions -
+             plain "consu" products, no dental_care_type (that selection only
+             applies to type="dental" treatments tracked through the chart) -->
+        <record id="product_category_dental_care" model="product.category">
+            <field name="name">Dental Care Products</field>
+        </record>
+
+        <record id="product_toothbrush" model="product.product">
+            <field name="image_1920" type="bytes" file="awesome_dental_practice/static/img/products/toothbrush.png"/>
+            <field name="name">Toothbrush (Soft)</field>
+            <field name="list_price">4.99</field>
+            <field name="standard_price">1.5</field>
+            <field name="type">consu</field>
+            <field name="uom_id" ref="uom.product_uom_unit"/>
+            <field name="categ_id" ref="product_category_dental_care"/>
+        </record>
+
+        <record id="product_electric_toothbrush" model="product.product">
+            <field name="image_1920" type="bytes" file="awesome_dental_practice/static/img/products/toothbrush_electric.png"/>
+            <field name="name">Electric Toothbrush</field>
+            <field name="list_price">45.0</field>
+            <field name="standard_price">18.0</field>
+            <field name="type">consu</field>
+            <field name="uom_id" ref="uom.product_uom_unit"/>
+            <field name="categ_id" ref="product_category_dental_care"/>
+        </record>
+
+        <record id="product_toothpaste" model="product.product">
+            <field name="image_1920" type="bytes" file="awesome_dental_practice/static/img/products/toothpaste.png"/>
+            <field name="name">Fluoride Toothpaste</field>
+            <field name="list_price">6.5</field>
+            <field name="standard_price">2.0</field>
+            <field name="type">consu</field>
+            <field name="uom_id" ref="uom.product_uom_unit"/>
+            <field name="categ_id" ref="product_category_dental_care"/>
+        </record>
+
+        <record id="product_dental_floss" model="product.product">
+            <field name="image_1920" type="bytes" file="awesome_dental_practice/static/img/products/floss.png"/>
+            <field name="name">Dental Floss</field>
+            <field name="list_price">3.5</field>
+            <field name="standard_price">1.0</field>
+            <field name="type">consu</field>
+            <field name="uom_id" ref="uom.product_uom_unit"/>
+            <field name="categ_id" ref="product_category_dental_care"/>
+        </record>
+
+        <record id="product_mouthwash" model="product.product">
+            <field name="image_1920" type="bytes" file="awesome_dental_practice/static/img/products/mouthwash.png"/>
+            <field name="name">Antiseptic Mouthwash</field>
+            <field name="list_price">7.99</field>
+            <field name="standard_price">3.0</field>
+            <field name="type">consu</field>
+            <field name="uom_id" ref="uom.product_uom_unit"/>
+            <field name="categ_id" ref="product_category_dental_care"/>
+        </record>
+
+        <record id="base.res_partner_address_15" model="res.partner">
+            <field name="is_patient" eval="True"/>
+        </record>
+        <record id="base.res_partner_address_28" model="res.partner">
+            <field name="is_patient" eval="True"/>
+        </record>
+    </data>
+</odoo>

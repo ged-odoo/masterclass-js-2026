@@ -1,0 +1,7 @@
+# Nothing here generates these - this repo holds a built site and the
+# skeleton addons, no sources and no scripts. They are ignored so that a
+# build run inside a checkout of it stays invisible rather than landing in a
+# commit.
+/_site/
+/_publish/
+/gas/__pycache__/

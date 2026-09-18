@@ -1,0 +1,43 @@
+/* "Catppuccin" - the well-known Catppuccin colour scheme
+   (github.com/catppuccin/catppuccin): Latte for the light face, Mocha for
+   the dark one - its own official light/dark pair, not an invented
+   reading. --lavender maps straight onto Catppuccin's own "Lavender"
+   swatch; --cyan onto its "Teal". */
+
+[data-palette="catppuccin"] {
+  --bg: #dce0e8;
+  --panel: #eff1f5;
+  --card: #e6e9ef;
+  --sidebar: #11111b;
+  --sidebar-text: #a6adc8;
+  --sidebar-active: #cdd6f4;
+  --text: #4c4f69;
+  --muted: #6c6f85;
+  --border: #ccd0da;
+  --accent: #8839ef;
+  --accent-soft: #f1e6fb;
+  --accent-light: #c6a3f2;
+  --pink: #ea76cb;
+  --cyan: #179299;
+  --yellow: #df8e1d;
+  --lavender: #7287fd;
+}
+
+[data-palette="catppuccin"][data-theme="dark"] {
+  --bg: #1e1e2e;
+  --panel: #313244;
+  --card: #45475a;
+  --sidebar: #11111b;
+  --sidebar-text: #a6adc8;
+  --sidebar-active: #cdd6f4;
+  --text: #cdd6f4;
+  --muted: #a6adc8;
+  --border: #585b70;
+  --accent: #cba6f7;
+  --accent-soft: #3b3355;
+  --accent-light: #e0cffa;
+  --pink: #f5c2e7;
+  --cyan: #94e2d5;
+  --yellow: #f9e2af;
+  --lavender: #b4befe;
+}

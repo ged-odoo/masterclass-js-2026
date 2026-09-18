@@ -1,0 +1,45 @@
+/* "Nord" - the well-known Nord colour scheme (nordtheme.com): Polar Night
+   for its darks, Snow Storm for its lights, Frost/Aurora for its accents.
+   Nord has no official light face of its own (it's a dark theme by
+   design) - the light face here reads the same Snow Storm/Polar Night/
+   accent families the other way round, the same kind of contrast-tuned
+   reading this project already does for a palette with no light source
+   (see claude.css's dark face). */
+
+[data-palette="nord"] {
+  --bg: #e5e9f0;
+  --panel: #eceff4;
+  --card: #d8dee9;
+  --sidebar: #2e3440;
+  --sidebar-text: #d8dee9;
+  --sidebar-active: #eceff4;
+  --text: #2e3440;
+  --muted: #4c566a;
+  --border: #c9d0dd;
+  --accent: #8f5c82;
+  --accent-soft: #f2e9f0;
+  --accent-light: #b98aa9;
+  --pink: #a54a53;
+  --cyan: #4f8fa0;
+  --yellow: #ad8a3d;
+  --lavender: #4f6d94;
+}
+
+[data-palette="nord"][data-theme="dark"] {
+  --bg: #2e3440;
+  --panel: #3b4252;
+  --card: #434c5e;
+  --sidebar: #2e3440;
+  --sidebar-text: #d8dee9;
+  --sidebar-active: #eceff4;
+  --text: #eceff4;
+  --muted: #d8dee9;
+  --border: #4c566a;
+  --accent: #b48ead;
+  --accent-soft: #3c3547;
+  --accent-light: #cba8c2;
+  --pink: #bf616a;
+  --cyan: #88c0d0;
+  --yellow: #ebcb8b;
+  --lavender: #5e81ac;
+}

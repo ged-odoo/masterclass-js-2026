@@ -1,0 +1,2719 @@
+/* GAS (GED Awesome Slides). A project's markup is its index.html, which
+   gas/build.py writes from gas/template.html and that project's sections/;
+   its script is gas/assets/app.js. See gas/README.md. */
+
+/* the framework's two default faces. Geist is the variable font, so a
+   medium or a semibold is a real cut rather than a synthesized one */
+@font-face {
+  font-family: "Caveat";
+  src: url("fonts/caveat-bold.woff2") format("woff2");
+  font-weight: 700;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Geist";
+  src: url("fonts/geist-variable.woff2") format("woff2");
+  font-weight: 300 800;
+  font-display: swap;
+}
+
+/* Palettes (the --bg/--accent/etc custom properties everything below reads)
+   are NOT here - each lives in its own self-contained file under
+   assets/palettes/, one [data-palette="<name>"] (light) and one
+   [data-palette="<name>"][data-theme="dark"] rule per file, the name taken
+   from the filename. build.py discovers every file in that folder and
+   links it into the page automatically - see gas/README.md - so adding a
+   palette is exactly "add a file there", nothing to register anywhere
+   else. app.js resolves which one's active (a stored choice, falling back
+   to the OS's own light/dark preference the first time) and always sets
+   both data-palette and data-theme explicitly on <html>, so nothing here
+   or in any palette file ever has to guess. "claude" (assets/palettes/
+   claude.css) is the default, and every one of these variables needs to be
+   understood as reads *from whichever palette file is currently linked in*. */
+
+* { box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  display: flex;
+  background: var(--bg);
+  color: var(--text);
+  font: 16px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+/* ---------- sidebar ---------- */
+
+.sidebar {
+  width: 300px;
+  flex: 0 0 300px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 22px 12px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background: var(--sidebar);
+  color: var(--sidebar-text);
+  transition: width 0.18s ease, flex-basis 0.18s ease, padding 0.18s ease;
+}
+
+.sidebar-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  margin: 0 0 18px;
+}
+
+.sidebar h1 {
+  margin: 0;
+  font-size: 15px;
+  min-width: 0;
+}
+
+/* collapsed: a narrow rail with just the toggle, so it is always easy to
+   bring back - everything else in the sidebar just fades out of the way */
+.sidebar.collapsed {
+  width: 44px;
+  flex-basis: 44px;
+  padding-left: 6px;
+  padding-right: 6px;
+}
+
+.sidebar.collapsed .sidebar-head {
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 14px;
+}
+
+.sidebar.collapsed .sidebar-toggle { order: -1; }
+
+/* the title still reads, top to bottom, running down the rail */
+.sidebar.collapsed h1 {
+  writing-mode: vertical-rl;
+  white-space: nowrap;
+}
+
+.sidebar.collapsed .home {
+  width: auto;
+  padding: 4px 6px;
+}
+
+.sidebar.collapsed #program,
+.sidebar.collapsed #program-end,
+.sidebar.collapsed > .nav-item,
+.sidebar.collapsed #theme-toggle {
+  display: none;
+}
+
+.sidebar.collapsed .sidebar-toggle svg { transform: rotate(180deg); }
+
+.sidebar-toggle {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  color: var(--sidebar-text);
+  cursor: pointer;
+}
+
+.sidebar-toggle:hover { background: rgba(255, 255, 255, 0.07); color: var(--sidebar-active); }
+
+.sidebar-toggle svg { transition: transform 0.15s ease; }
+
+/* light/dark: the one personal, per-viewer toggle - sets data-theme on
+   <html>, everything else follows from there. The palette picker itself
+   lives in the editor panel instead (#palette-select, further down) -
+   a project setting, not a personal one, see there for why.
+   Kept deliberately quiet: smaller and dimmer than the collapse toggle
+   it sits next to in .sidebar-head, since most viewers never need it. */
+#theme-toggle {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  color: var(--sidebar-text);
+  opacity: 0.6;
+  cursor: pointer;
+}
+
+#theme-toggle:hover { background: rgba(255, 255, 255, 0.07); color: var(--sidebar-active); opacity: 1; }
+
+/* which icon shows follows the *current* theme, same idea as the editor's
+   own minimize/pencil swap (style.css's "edit mode" section) - showing what
+   clicking it switches to, not what it already is, reads backwards here
+   (a sun on a light page inviting you toward more light) so it's the
+   opposite of that one: this shows the CURRENT theme's own icon */
+:root[data-theme="dark"] #theme-toggle .icon-sun,
+#theme-toggle .icon-moon { display: none; }
+
+:root[data-theme="dark"] #theme-toggle .icon-moon { display: flex; }
+
+.home {
+  display: block;
+  width: 100%;
+  padding: 6px 10px;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  color: var(--sidebar-active);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-align: left;
+  cursor: pointer;
+}
+
+.home:hover { background: rgba(255, 255, 255, 0.07); }
+
+/* a topic folds away: its heading is the toggle, and only one stays open */
+.nav-section {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  margin: 4px 0 2px;
+  padding: 5px 12px;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  color: #9a9da3;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-align: left;
+  cursor: pointer;
+}
+
+.nav-section:hover { color: #c9ccd2; }
+
+.nav-section svg {
+  flex: 0 0 12px;
+  transition: transform 0.15s ease;
+}
+
+.nav-section[aria-expanded="true"] svg { transform: rotate(90deg); }
+
+.nav-item {
+  display: block;
+  width: 100%;
+  padding: 9px 12px;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  color: inherit;
+  font: inherit;
+  font-size: 14.5px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.nav-item:hover { background: rgba(255, 255, 255, 0.07); }
+
+/* an action, not a place to go: under a hairline, at the foot of everything
+   the sidebar lists, and quieter than the entries it prints */
+.nav-item.print-everything {
+  margin-top: 10px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 0;
+  font-size: 13.5px;
+  opacity: 0.75;
+}
+
+.nav-item.print-everything:hover {
+  background: none;
+  opacity: 1;
+}
+
+/* the display above beats the hidden attribute's own display:none, so the
+   two optional entries - Collaborative Pad, Resources, both hidden by
+   app.js unless config.js asks for them - need saying again, the same way
+   .nav-group[hidden] does below */
+.nav-item[hidden] { display: none; }
+
+/* the browser's own ring is a dark hairline, lost against a dark sidebar. It
+   is only ever seen by someone arriving on the keyboard, who needs to see it */
+.sidebar button:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.45);
+  outline-offset: -2px;
+}
+
+.nav-item[aria-current="page"] {
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--sidebar-active);
+  font-weight: 500;
+}
+
+/* a rule down the side gathers the entries that belong to one topic */
+.nav-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 2px 0 10px 22px;
+  padding-left: 10px;
+  border-left: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.nav-group[hidden] { display: none; }
+
+/* an entry that belongs to no topic: no rule, no indent */
+.nav-group.flat {
+  margin: 0 0 10px;
+  padding-left: 0;
+  border-left: 0;
+}
+
+.nav-group .nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 10px;
+  font-size: 15.5px;
+  line-height: 1.35;
+}
+
+.nav-group .nav-item svg {
+  flex: 0 0 16px;
+  color: #7f838a;
+}
+
+.nav-group .nav-item:hover svg { color: #a5a9b0; }
+
+.nav-group .nav-item[aria-current="page"] svg { color: var(--accent-light); }
+
+/* ---------- main ---------- */
+
+main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: auto;
+}
+
+.view {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.view[hidden] { display: none; }
+
+/* full screen shows the slide alone, the browser paints black otherwise */
+.view:fullscreen { background: var(--bg); }
+
+/* nothing else is on the screen, so the slide takes all of it: no stage
+   padding, no room held for the deck bar, no frame around the edge */
+.view:fullscreen .stage { padding: 0; }
+
+.view:fullscreen .slide {
+  max-width: min(100vw, calc(100vh * 16 / 9));
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+/* the bar keeps its place at the bottom edge, out of sight until pointed at */
+.view:fullscreen .deck-bar {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  padding: 12px;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.view:fullscreen .deck-bar:hover { opacity: 1; }
+
+/* ---------- slides ---------- */
+
+.stage {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  min-height: 0;
+}
+
+.deck {
+  display: none;
+  width: 100%;
+  justify-content: center;
+}
+
+.deck.current { display: flex; }
+
+.slide {
+  /* fill the stage, capped by whatever the window height allows in 16:9 -
+     no fixed pixel cap: screens and projectors vary wildly in resolution,
+     and since every size in here is relative to the slide's own box (cqw),
+     a bigger screen just renders a bigger, equally legible slide */
+  width: 100%;
+  max-width: calc((100vh - 150px) * 16 / 9);
+  aspect-ratio: 16 / 9;
+  container-type: size;
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2.2cqw;
+  padding: 6cqw 7cqw;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--panel);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  /* this box resizes with the viewport (screen, window, projector all
+     differ), but at any given size every slide must still match its
+     neighbours - a scrollbar never fits that story, and neither does
+     shrinking one card smaller than the rest: app.js's fitSlide() instead
+     turns down --content-scale (below, and on every font-size in this
+     stylesheet) just enough for the rare slide that runs long, so its box
+     stays identical to its neighbours' at whatever size the screen gives it */
+  overflow: hidden;
+}
+
+.slide.current { display: flex; }
+
+/* ---------- printing a deck ---------- */
+
+/* every slide of the current deck, not just the one on screen - app.js adds
+   this class, runs the same fitSlide() a single slide always gets on each
+   one in turn (there's just many of them laid out at once now), then calls
+   print(). Removed again on the browser's "afterprint" event. */
+body.printing .sidebar,
+body.printing .deck-bar,
+body.printing .editor,
+body.printing .annot-layer,
+body.printing .view:not(#view-slides) {
+  display: none !important;
+}
+
+/* main's own overflow:auto turns it into a scroll container - and a
+   scroll container clips to one page instead of paginating across
+   several, so printing eleven slides would print only the first */
+body.printing main { overflow: visible; }
+
+body.printing .deck.current {
+  flex-direction: column;
+  align-items: center;
+}
+
+body.printing .slide {
+  display: flex !important;
+  margin: 0 auto 24px;
+}
+
+/* ---------- printing everything ---------- */
+
+/* app.js moves every deck, exercise and page in here for the print and puts
+   them back when it is over (see "printing everything" there) - empty, and
+   out of the way, the rest of the time */
+#print-all { display: none; }
+
+body.printing-all #print-all { display: block; }
+
+/* whatever each one does on screen - one deck current, one project current,
+   one view not hidden - in the document all of them show */
+body.printing-all #print-all .deck {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+body.printing-all #print-all .project,
+body.printing-all #print-all .view {
+  display: block !important;
+}
+
+/* what is left behind on the page itself: an empty stage, an empty exercise
+   page, the welcome cover, the pad's iframe */
+body.printing-all main > .view { display: none !important; }
+
+/* nothing here does anything on paper */
+body.printing-all .code-toolbar,
+body.printing-all .heading-link,
+body.printing-all .md-edit-btn,
+body.printing-all .solution-btn,
+body.printing-all .solution-row { display: none !important; }
+
+/* a solution, back under the button that opens it on screen */
+.print-solution { margin: 0 0 18px; }
+
+.print-solution > h4 {
+  margin: 0 0 10px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+@media print {
+  /* the standard widescreen slide size - 13.333in x 7.5in at 96dpi is
+     1280x720, the usual reference resolution for a 16:9 deck. A real
+     printer scales it to whatever paper is loaded; "Save as PDF"
+     reproduces it exactly, one slide to a page */
+  @page {
+    size: 13.333in 7.5in;
+    margin: 0;
+  }
+
+  /* A cover's artwork and a dark act divider are backgrounds, and the print
+     dialog's "Background graphics" box is off by default: without this the
+     browser drops both and prints a white slide with white text on it. */
+  body.printing,
+  body.printing .slide {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* The page is already the slide's own 16:9, so the stage gives up its
+     padding and the slide gives up the cap it carries on screen - that cap
+     is derived from the viewport height (100vh, the page here), which
+     leaves the slide at about four fifths of the page and drifting down it.
+     Width alone is enough: aspect-ratio takes the height from it. */
+  body.printing .stage { padding: 0; }
+
+  /* a page break between flex *items* barely works in Chromium's print
+     engine - the first one routinely comes out blank. Each slide stays
+     flex internally (its own head/body/foot column), but the list of
+     them switches to plain block flow, which fragments across pages the
+     way it's actually meant to */
+  body.printing .stage,
+  body.printing .deck.current {
+    display: block;
+  }
+
+  body.printing .slide {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    break-after: page;
+  }
+
+  body.printing .slide:last-child { break-after: auto; }
+
+  /* printing everything, continued: a deck is a flex column on screen, and a
+     page break between flex items barely works in Chromium - the same block
+     flow a single deck switches to above */
+  body.printing-all #print-all .deck { display: block; }
+
+  /* ...which also means every slide breaks, not every slide but the last of
+     its own deck: otherwise the next deck's cover shares a page with it */
+  body.printing-all #print-all .slide { break-after: page; }
+
+  /* the exercises and the plain pages are documents, not slides, so they get
+     a page of their own shape. Named pages are Chromium's (Chrome 110 and
+     up); a browser without them prints these on the slide page, which still
+     reads - the fallback is ugly, not broken. */
+  @page doc {
+    size: A4 portrait;
+    margin: 16mm;
+  }
+
+  /* the welcome cover is the one view that is a slide, not a document: it
+     keeps the slide page, full bleed, like the decks under it */
+  body.printing-all #print-all .project,
+  body.printing-all #print-all .view:not(#view-welcome) {
+    page: doc;
+    break-before: page;
+    padding: 0;
+    /* the page size changes per named page, but the width everything is laid
+       out against does not: it stays the slide page's, so a document sized to
+       fill it is simply cut off at the right edge of its own A4. 178mm is
+       what is left of A4 between the margins above - said once, here. */
+    width: 178mm;
+    max-width: 178mm;
+  }
+
+  /* a code sample scrolls sideways on screen; on paper it has to wrap or the
+     right of every long line is simply gone */
+  body.printing-all .md pre {
+    overflow: visible;
+    white-space: pre-wrap;
+  }
+
+  body.printing-all .md img { max-width: 100%; }
+
+  /* a screenshot split across two pages is unreadable on both - marked wraps
+     an image of its own in a paragraph, so that is what has to stay whole */
+  body.printing-all .md p:has(img) { break-inside: avoid; }
+
+  body.printing-all .md h1,
+  body.printing-all .md h2,
+  body.printing-all .md h3 { break-after: avoid; }
+}
+
+.slide h2 {
+  margin: 0;
+  /* the template's title face, ~36pt on a 720pt slide */
+  font-family: "Caveat", ui-rounded, cursive;
+  font-size: max(24px, calc(5cqw * var(--content-scale, 1)));
+  font-weight: 700;
+  line-height: 1.05;
+}
+
+.slide.title-slide h2 { font-size: max(30px, calc(6.67cqw * var(--content-scale, 1))); }
+
+.slide .lead {
+  margin: 0;
+  font-family: "Geist", inherit;
+  font-size: max(14px, calc(2.2cqw * var(--content-scale, 1)));
+  color: var(--muted);
+}
+
+.slide ul {
+  margin: 0;
+  padding-left: 1.4em;
+}
+
+.slide li {
+  margin-bottom: 0.5em;
+  font-family: "Geist", inherit;
+  font-size: max(14px, calc(2.5cqw * var(--content-scale, 1)));
+}
+
+.slide h3 {
+  margin: 0 0 1.4cqw;
+  font-family: "Geist", inherit;
+  font-size: max(11px, calc(1.6cqw * var(--content-scale, 1)));
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* the counter example: the class on the left, its template on the right */
+.slide .code-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2.5cqw;
+}
+
+/* both panels run to the same depth, so their captions line up */
+.slide .code-cols > div {
+  display: flex;
+  flex-direction: column;
+}
+
+.slide .code-cols .code-block { flex: 1; display: flex; }
+.slide .code-cols .code-block pre { flex: 1; }
+
+.code-block { position: relative; }
+
+/* no focus ring here: the browser's own default, which Prism's tabindex on
+   the pre can trigger, and a custom one both turned into more trouble
+   (stray lines, stuck-open states) than the affordance was worth. The
+   blinking caret while typing is cue enough that a block is editable. */
+.code-block pre { outline: none; }
+
+.code-toolbar {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  display: flex;
+  gap: 6px;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.code-block:hover .code-toolbar,
+.code-block:focus-within .code-toolbar { opacity: 1; }
+
+.code-btn {
+  padding: 3px 9px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--panel);
+  color: var(--muted);
+  font: inherit;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.code-btn:hover { color: var(--text); border-color: var(--muted); }
+
+.slide pre {
+  margin: 0;
+  padding: 1.6cqw 1.8cqw;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  /* --card, not --panel: the slide it sits on is already --panel, and a
+     code sample painted the same colour as the slide is a border and
+     nothing else (see the note by .rows.days) */
+  background: var(--card);
+  font-size: max(7px, calc(1.25cqw * var(--content-scale, 1)));
+  line-height: 1.5;
+  overflow: auto;
+}
+
+/* the inline-code pill would tint every token of a block */
+.slide pre code {
+  padding: 0;
+  background: none;
+  color: inherit;
+  font-size: inherit;
+}
+
+/* Prism paints the tokens, in the deck's colours rather than its own theme,
+   on a slide and in a page rendered from markdown alike */
+pre .token.comment { color: #8a8f98; font-style: italic; }
+
+pre .token.punctuation,
+pre .token.operator { color: #7c828a; }
+
+pre .token.keyword,
+pre .token.attr-name { color: var(--accent); }
+
+pre .token.string,
+pre .token.attr-value { color: #9c4221; }
+
+pre .token.tag,
+pre .token.class-name,
+pre .token.function { color: #2b6cb0; }
+
+pre .token.number,
+pre .token.boolean { color: #1f6f5c; }
+
+/* dark (either palette, same 5 roles): re-tuned for legibility on --bg's
+   dark surface - approximated from the template's own dark code-panel
+   slides (which do use these same 5 roles, just not at a resolution
+   pixel-sampling can recover exactly), not a generic borrowed Prism theme.
+   :root *is* <html> - a plain descendant selector off it is all this needs */
+:root[data-theme="dark"] pre .token.comment { color: #9a9ba0; }
+:root[data-theme="dark"] pre .token.punctuation,
+:root[data-theme="dark"] pre .token.operator { color: #9ba1aa; }
+:root[data-theme="dark"] pre .token.string,
+:root[data-theme="dark"] pre .token.attr-value { color: #d19a66; }
+:root[data-theme="dark"] pre .token.tag,
+:root[data-theme="dark"] pre .token.class-name,
+:root[data-theme="dark"] pre .token.function { color: #6fa8dc; }
+:root[data-theme="dark"] pre .token.number,
+:root[data-theme="dark"] pre .token.boolean { color: #4fd1a5; }
+
+/* what the slide is pointing at, where the old deck drew an arrow: a marker
+   stroke, warm enough to carry over the syntax colours it covers */
+.slide pre mark {
+  padding: 0 2px;
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--yellow) 55%, transparent);
+  color: inherit;
+  font-weight: 600;
+}
+
+.slide .caption {
+  margin: 0.9cqw 0 0;
+  color: var(--muted);
+  font-family: "Geist", inherit;
+  font-size: max(9px, calc(1.4cqw * var(--content-scale, 1)));
+  text-align: center;
+}
+
+.slide code {
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.88em;
+}
+
+/* the accent dot of the template's bullets, and its bold keyword */
+.slide li::marker { color: var(--accent); }
+
+.slide strong {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* a sample that has the slide's width to itself, rather than half of it */
+.slide pre.big { font-size: max(9px, calc(1.45cqw * var(--content-scale, 1))); }
+
+.deck-bar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 14px 32px 26px;
+}
+
+.deck-bar button {
+  padding: 6px 14px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--panel);
+  color: var(--text);
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.deck-bar button:hover:not(:disabled) { border-color: var(--muted); }
+
+.deck-bar button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+/* pulled out of the flex row entirely (a margin: auto here would still be
+   "in" the row, so it'd shove Start/Previous/Next off center to make
+   room) - set apart from that cluster, but still clear of the
+   bottom-right corner, where the ?mode=edit panel's minimized pencil icon
+   always rests */
+.print-deck {
+  position: absolute;
+  /* matches the row's own padding-top, not a 50%-of-the-box centering -
+     the row's padding is asymmetric (14px/26px), so centering on the
+     whole box would miss the other buttons' actual vertical center */
+  top: 14px;
+  right: 90px;
+}
+
+.counter {
+  min-width: 60px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.counter:hover { color: var(--text); }
+
+.counter-input {
+  width: 44px;
+  text-align: center;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--panel);
+  color: var(--text);
+  font: inherit;
+  font-size: 14px;
+}
+
+/* ---------- a presentation's cover ---------- */
+
+/* a cover is not one of the slides that follow it: it sits on the ground a
+   card sits on, a shade off the panel every other slide is, and carries the
+   number of its topic - app.js puts that there, see "a cover's topic number".
+   .deck.clean, not .clean: the deck's own `background: var(--panel)` further
+   down this file matches just as tightly and would otherwise win on order. */
+.deck.clean .slide.cover {
+  position: relative;
+  /* not --card: in several palettes that is the page's own ground, and a
+     cover painted in it stops reading as a card at all on screen. A few
+     percent of the ink instead - off the panel in both light and dark, and
+     the only difference a printed page sees, where there is no ground */
+  background: color-mix(in srgb, var(--text) 4%, var(--panel));
+}
+
+.cover-numeral {
+  position: absolute;
+  top: 50%;
+  right: 4cqw;
+  transform: translateY(-50%);
+  font-family: "Caveat", ui-rounded, cursive;
+  font-weight: 700;
+  font-size: 44cqw;
+  line-height: 0.78;
+  color: var(--accent);
+  opacity: 0.1;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* an absolutely positioned element paints over static ones whatever the
+   order - the words go back on top */
+.deck.clean .slide.cover .slide-head,
+.deck.clean .slide.cover .slide-foot { position: relative; }
+
+/* ---------- welcome cover ---------- */
+
+/* the cover is a slide, with the same frame as every other slide */
+.slide.welcome {
+  position: relative;
+  justify-content: center;
+  overflow: hidden;
+  color: #fff;
+}
+
+.slide.welcome {
+  /* offsets live on .welcome-content: cq units in the container's own
+     padding would resolve against the viewport, not the slide */
+  justify-content: flex-start;
+  padding: 0;
+}
+
+.slide.welcome h2 {
+  font-family: "Caveat", ui-rounded, cursive;
+  font-size: 8.3cqw;
+  font-weight: 700;
+  font-style: normal;
+  line-height: 0.975;
+  letter-spacing: 0;
+}
+
+.slide.welcome .lead {
+  font-family: "Geist", inherit;
+  font-size: 2.03cqw;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.welcome-bg {
+  position: absolute;
+  inset: 0;
+  background-color: #16114a;
+  background-image:
+    /* purple bloom across the middle, navy sinking into the corners */
+    radial-gradient(85% 70% at 62% 34%, rgba(139, 48, 143, 0.62), transparent 66%),
+    radial-gradient(60% 60% at 6% 6%, rgba(26, 28, 112, 0.92), transparent 72%),
+    radial-gradient(70% 65% at 96% 96%, rgba(21, 20, 78, 0.9), transparent 70%),
+    radial-gradient(55% 55% at 8% 96%, rgba(38, 24, 92, 0.8), transparent 72%),
+    linear-gradient(145deg, #171450 0%, #331c5e 52%, #1d1550 100%);
+}
+
+/* the generated starfield sits on top of the gradient */
+.welcome-stars {
+  position: absolute;
+  inset: 0;
+  background-repeat: repeat;
+}
+
+.welcome-art {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.welcome-art img { position: absolute; }
+
+.welcome-content {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 3.6cqw;
+  margin: 17.24cqw 0 0 7.5cqw;
+}
+
+/* placed where the template puts it: 17.5% wide, 4.5% in, 7.8% down */
+.welcome-logo {
+  position: absolute;
+  top: 7.8%;
+  right: 4.5%;
+  width: 17.5%;
+  height: auto;
+}
+
+/* ---------- projects ---------- */
+
+.page {
+  padding: 48px 56px;
+}
+
+.page h2 {
+  margin: 0 0 12px;
+  font-size: 28px;
+}
+
+.note {
+  margin-top: 26px;
+  color: var(--muted);
+  font-size: 14.5px;
+}
+
+.note a,
+.project a { color: var(--accent); }
+
+.project { display: none; max-width: 700px; }
+
+/* a page rendered from markdown holds code and screenshots, not three bullets */
+.project.markdown { max-width: 860px; }
+
+.md h1 {
+  margin: 0 0 14px;
+  font-size: 28px;
+}
+
+.md h2 {
+  margin: 40px 0 12px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border);
+  font-size: 21px;
+}
+
+.md h3 { margin: 26px 0 10px; font-size: 17px; }
+
+/* the "see also" headings, a rung quieter than the text they follow */
+.md h4 {
+  margin: 20px 0 6px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.md p { margin: 0 0 12px; }
+
+.md ul,
+.md ol {
+  margin: 0 0 14px;
+  padding-left: 1.5em;
+}
+
+.md li { margin-bottom: 6px; }
+
+.md pre {
+  margin: 0 0 16px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--panel);
+  font-size: 13px;
+  line-height: 1.5;
+  overflow-x: auto;
+}
+
+/* the pill styling of inline code would tint every token of a block */
+.md pre code {
+  padding: 0;
+  background: none;
+  color: inherit;
+  font-size: inherit;
+}
+
+/* a solution opens full screen, in a <dialog> built from the <details> at
+   render time (see app.js) - this is what the <details> itself would have
+   looked like, kept as the button that opens it */
+.md .solution-btn {
+  display: block;
+  width: 100%;
+  margin: 0 0 16px;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 600;
+  text-align: left;
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.md .solution-btn:hover { filter: brightness(0.97); }
+
+/* full screen, over the sidebar too - a plain white page of its own rather
+   than a panel floating over this one, so there's only one way back (Close,
+   or Escape) and the exercise underneath keeps its scroll position untouched */
+.solution-dialog {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  max-width: 100vw;
+  max-height: 100vh;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  color: var(--text);
+  background: var(--bg);
+}
+
+.solution-dialog::backdrop { background: rgba(0, 0, 0, 0.6); }
+
+/* :has() needs a fallback-free browser, which every one of these already is
+   (this page vendors nothing that would run on an older one) */
+body:has(dialog.solution-dialog[open]),
+body:has(dialog.source-dialog[open]) { overflow: hidden; }
+
+.solution-close,
+.solution-edit {
+  position: fixed;
+  top: 16px;
+  z-index: 1;
+  padding: 8px 16px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 600;
+  color: var(--text);
+  background: var(--panel);
+}
+
+.solution-close { right: 24px; }
+
+/* only there in edit mode (see makeSolutionDialogs) - straight to Edit
+   source scoped to just this solution, without opening the editor panel */
+.solution-edit { right: 104px; }
+
+.solution-close:hover,
+.solution-edit:hover { filter: brightness(0.97); }
+
+.solution-body {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 70px 40px 60px;
+}
+
+.solution-body > :first-child { margin-top: 0; }
+
+@media (max-width: 720px) {
+  .solution-body { padding: 60px 20px 40px; }
+}
+
+/* ?mode=edit's "Edit source" - always the exact text on disk, always
+   editable (CodeJar, syntax-coloured, same as every code sample elsewhere
+   on the page) - never a rendered/WYSIWYG view, which is what would risk
+   corrupting markdown/HTML syntax on save */
+.source-dialog {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  max-width: 720px;
+  max-height: 80vh;
+  margin: auto;
+  padding: 18px 20px 16px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  background: var(--panel);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.22);
+}
+
+/* a bare <dialog> relies on the browser's own dialog:not([open]) { display:
+   none } to stay hidden until showModal() - setting display unconditionally
+   above would override that (an author rule always beats the UA one,
+   regardless of specificity) and leave it stuck open, visible, unclosable */
+.source-dialog[open] {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.source-dialog::backdrop { background: rgba(0, 0, 0, 0.5); }
+
+.source-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.source-head strong {
+  font-size: 15px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.source-status {
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 13px;
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.source-status.error { background: #fbeceb; color: #b3261e; }
+
+.source-raw {
+  flex: 1;
+  min-height: 0;
+  margin: 0;
+  overflow: auto;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--text);
+  font: 13px/1.5 var(--mono, monospace);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.source-raw:focus-within { outline: 2px solid var(--accent-soft); border-color: var(--accent); }
+
+/* CodeJar sets contenteditable on the <code> itself, not its <pre> wrapper */
+.source-raw code { outline: none; }
+
+.source-toolbar {
+  display: flex;
+  gap: 8px;
+}
+
+.source-toolbar button {
+  padding: 5px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--panel);
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.source-toolbar button:hover { border-color: var(--accent); }
+
+.source-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.source-actions button {
+  padding: 6px 14px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--panel);
+  color: var(--text);
+  font: inherit;
+  font-size: 13.5px;
+  cursor: pointer;
+}
+
+.source-actions button:hover { border-color: var(--accent); }
+
+.source-actions button.primary {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: white;
+}
+
+.source-actions button.primary:hover { filter: brightness(1.08); }
+
+/* a permalink next to every heading in an exercise, Wikipedia/GitHub-style -
+   invisible until the heading itself is hovered (or the link is focused, for
+   a keyboard user tabbing through), copies a direct url to that heading */
+.md h1, .md h2, .md h3, .md h4 { position: relative; }
+
+.heading-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 0.75em;
+  height: 0.75em;
+  margin-left: 0.4em;
+  color: var(--muted);
+  text-decoration: none;
+  opacity: 0;
+  cursor: pointer;
+  vertical-align: middle;
+}
+
+.md h1:hover .heading-link,
+.md h2:hover .heading-link,
+.md h3:hover .heading-link,
+.md h4:hover .heading-link,
+.heading-link:focus-visible {
+  opacity: 1;
+}
+
+.heading-link:hover { color: var(--accent); }
+.heading-link svg { width: 100%; height: 100%; }
+
+/* a small inline pencil next to each numbered exercise step's heading and
+   each solution's own button - opens Edit source scoped to just that one
+   (markdown-heading / markdown-solution), not the whole exercise file */
+.md-edit-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  margin-left: 6px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--panel);
+  color: var(--muted);
+  cursor: pointer;
+  vertical-align: middle;
+}
+
+.md-edit-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+/* a solution's own "Edit" sits with its Show solution button */
+.solution-row {
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+
+/* a solution's before/after, side by side, each fully syntax-highlighted -
+   only what changed is marked, coloured the way a diff usually is */
+.md .diff-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin: 0 0 16px;
+}
+
+/* grid items default to the width of their content (a long unwrapped code
+   line here) rather than their track's - without this, a long line pushes
+   the whole grid wider instead of scrolling inside its own <pre> */
+.md .diff-cols > div { display: flex; flex-direction: column; min-width: 0; }
+
+.md .diff-cols h4 {
+  margin: 0 0 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* a column is already stretched to match its sibling's height (grid's
+   default) - grow the pre itself into that height too, or a short "before"
+   next to a long "after" reads as two differently-sized boxes, not one
+   comparison at a shared size. The pre is wrapped in a .code-block (see
+   setupCodeBlocks in app.js), so that has to pass the height down too */
+.md .diff-cols .code-block { flex: 1; display: flex; flex-direction: column; }
+.md .diff-cols pre { margin: 0; flex: 1; }
+
+.md .diff-cols .before pre mark { padding: 0; border-radius: 0; font-weight: inherit; background: #ffeef0; color: #b31d28; }
+.md .diff-cols .after pre mark { padding: 0; border-radius: 0; font-weight: inherit; background: #e6ffed; color: #22863a; }
+
+/* dark: the light-mode pair above reads as a near-white smear on a dark
+   code background, and the reverse (a dark-on-dark red/green) would have
+   the same problem the other way - these need their own values, not a
+   color-mix of the light ones. Same red/green GitHub's own dark diff view
+   uses. */
+:root[data-theme="dark"] .md .diff-cols .before pre mark { background: rgba(248, 81, 73, 0.18); color: #ffa198; }
+:root[data-theme="dark"] .md .diff-cols .after pre mark { background: rgba(46, 160, 67, 0.18); color: #56d364; }
+
+@media (max-width: 860px) {
+  .md .diff-cols { grid-template-columns: 1fr; }
+}
+
+.md img {
+  display: block;
+  max-width: 100%;
+  margin: 8px 0 18px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+.md blockquote {
+  margin: 0 0 14px;
+  padding-left: 14px;
+  border-left: 3px solid var(--border);
+  color: var(--muted);
+}
+
+.project.current { display: block; }
+
+.project .lead {
+  margin: 0 0 20px;
+  font-size: 17px;
+  color: var(--muted);
+}
+
+.project li { margin-bottom: 8px; }
+
+/* a screenshot, as against the decorative owl below it: it earns the full
+   column, and a hairline so a light UI does not bleed into the page */
+.project img.shot {
+  display: block;
+  width: 100%;
+  max-width: 960px;
+  margin: 24px 0 4px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+/* a screenshot needs more than the 700px a page of three bullets does, so a
+   page carrying one widens to fit it - same call as .project.markdown above */
+.project:has(img.shot) { max-width: 960px; }
+
+.project img.owl {
+  display: block;
+  width: 240px;
+  max-width: 100%;
+  margin: 28px 0 0;
+  border-radius: 8px;
+}
+
+/* .md, not .project: a solution's own text is moved into a <dialog> at
+   render time (see makeSolutionDialogs in app.js), outside the .project
+   article entirely, but always keeps this class - the reset for a block
+   code sample's <code> just below already relies on the same scope */
+.md code {
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.9em;
+}
+
+/* the highlighter-marker look every palette's --pink/--cyan/--yellow/
+   --lavender exist for (see assets/palettes/) - a translucent band of
+   colour under a word or phrase, the same "hand marked this up" language
+   as the OXP26 template these came from. Wrap a <mark> (or any inline
+   element) in .rows/.bullets/a heading/a lead - anywhere in slide or
+   exercise text - not the code-sample <code> above, which already has its
+   own, unrelated pill styling. box-decoration-break so a mark that wraps
+   across two lines gets its own rounded band on each, not one dragged
+   across the gap between them. */
+.mark-yellow, .mark-pink, .mark-cyan, .mark-lavender {
+  padding: 0.05em 0.2em;
+  border-radius: 3px;
+  color: inherit;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
+.mark-yellow { background: color-mix(in srgb, var(--yellow) 55%, transparent); }
+.mark-pink { background: color-mix(in srgb, var(--pink) 45%, transparent); }
+.mark-cyan { background: color-mix(in srgb, var(--cyan) 45%, transparent); }
+.mark-lavender { background: color-mix(in srgb, var(--lavender) 45%, transparent); }
+
+/* ---------- resources ---------- */
+
+.link-group {
+  margin-bottom: 34px;
+}
+
+.link-group h3 {
+  margin: 0 0 12px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.link-list {
+  display: grid;
+  gap: 10px;
+  max-width: 640px;
+}
+
+.link-card {
+  display: block;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel);
+  color: inherit;
+  text-decoration: none;
+}
+
+.link-card:hover { border-color: var(--accent); }
+
+.link-card strong {
+  display: block;
+  font-size: 15.5px;
+  font-weight: 600;
+}
+
+.link-card span {
+  display: block;
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.link-card em {
+  display: block;
+  margin-top: 6px;
+  color: var(--accent);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12.5px;
+  font-style: normal;
+  word-break: break-all;
+}
+
+/* ---------- collaborative pad ---------- */
+
+.pad-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--border);
+  background: var(--panel);
+  font-size: 14px;
+}
+
+.pad-bar a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.pad-bar a:hover { text-decoration: underline; }
+
+#pad-frame {
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+  border: 0;
+}
+
+/* ---------- edit mode ---------- */
+
+.editor {
+  position: fixed;
+  right: 22px;
+  bottom: 22px;
+  z-index: 50;
+  width: 380px;
+  max-width: calc(100vw - 44px);
+  padding: 14px 16px 16px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--panel);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.14);
+  font-size: 14px;
+}
+
+.editor-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.editor-title-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.editor-head strong { font-size: 14.5px; }
+
+.editor-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.editor-minimize {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--panel);
+  color: var(--muted);
+  cursor: pointer;
+}
+
+/* a flex item's default flex-shrink otherwise collapses an svg with no
+   width of its own (unlike an <img>, it has no intrinsic size to fall
+   back on) down to nothing */
+.editor-minimize svg { flex: 0 0 14px; }
+
+.editor-minimize:hover { border-color: var(--accent); color: var(--accent); }
+
+/* the classic dash while open (there's something to minimize); once
+   minimized, the button *is* the whole panel, so it switches to the
+   pencil - a reminder of what's tucked away, not another minimize control */
+.editor-minimize .icon-pencil { display: none; }
+.editor.minimized .editor-minimize .icon-minimize { display: none; }
+.editor.minimized .editor-minimize .icon-pencil { display: flex; }
+
+/* collapsed to just the pencil icon that opened it - everything else in
+   the panel is hidden rather than removed, so it picks up right where it
+   was left the moment it's clicked open again */
+.editor.minimized {
+  width: auto;
+  padding: 8px;
+  cursor: pointer;
+}
+
+.editor.minimized .editor-head { margin-bottom: 0; }
+
+.editor.minimized .editor-head strong,
+.editor.minimized .editor-buttons,
+.editor.minimized .editor-body {
+  display: none;
+}
+
+.editor button {
+  padding: 5px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--panel);
+  color: var(--text);
+  font: inherit;
+  font-size: 13.5px;
+  cursor: pointer;
+}
+
+.editor button:hover { border-color: var(--accent); }
+
+.editor label {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--muted);
+  font-size: 12.5px;
+}
+
+.editor input,
+.editor textarea {
+  width: 100%;
+  padding: 7px 9px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--panel);
+  color: var(--text);
+  font: inherit;
+  font-size: 14px;
+}
+
+.editor input:focus,
+.editor textarea:focus {
+  outline: 2px solid var(--accent-soft);
+  border-color: var(--accent);
+}
+
+.editor textarea {
+  margin-top: 10px;
+  min-height: 96px;
+  resize: vertical;
+}
+
+.editor-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.editor button.danger:hover {
+  border-color: #b3261e;
+  color: #b3261e;
+}
+
+.editor-meta {
+  margin-top: 9px;
+  color: var(--muted);
+  font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
+}
+
+.editor[data-empty="1"] input,
+.editor[data-empty="1"] textarea,
+.editor[data-empty="1"] .editor-tools,
+.editor[data-empty="1"] .editor-actions,
+.editor[data-kind="section"] .editor-actions,
+.editor[data-kind="solution"] .editor-actions { opacity: 0.5; pointer-events: none; }
+
+/* unlike .editor-actions above (New/Delete slide - slides only), Edit
+   source works on a slide, a section, or a solution alike - only "nothing
+   open at all" disables it */
+.editor-actions-all {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.palette-label {
+  font-size: 12.5px;
+  color: var(--muted);
+}
+
+/* the project's own palette picker - same look as .editor button next to
+   it, a <select> just isn't one */
+#palette-select {
+  padding: 5px 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--panel);
+  color: var(--text);
+  font: inherit;
+  font-size: 13.5px;
+  cursor: pointer;
+}
+
+#palette-select:hover { border-color: var(--accent); }
+
+.editor[data-empty="1"] .editor-actions-all { opacity: 0.5; pointer-events: none; }
+
+/* drawing tools: point at something on the slide itself */
+.editor-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+
+.editor-tools button { padding: 5px 9px; }
+
+.editor-tools .tools-label {
+  margin-right: auto;
+  color: var(--muted);
+  font-size: 12.5px;
+}
+
+.editor-tools button[aria-pressed="true"] {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+/* the layer is laid over the slide, and only takes the mouse while a tool is on */
+.annot-layer {
+  position: fixed;
+  z-index: 40;
+  pointer-events: none;
+}
+
+.annot-layer[data-tool] {
+  pointer-events: auto;
+  cursor: crosshair;
+}
+
+/* words written near an edge stay readable instead of being cut off */
+.annot-layer svg { overflow: visible; }
+
+.annot-input {
+  position: absolute;
+  min-width: 180px;
+  padding: 2px 6px;
+  border: 1px solid #e11d1d;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.96);
+  color: #e11d1d;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+/* export dialog */
+.export-back {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  padding: 32px;
+  background: rgba(20, 20, 24, 0.45);
+}
+
+.export-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: min(760px, 100%);
+  max-height: 100%;
+  padding: 18px;
+  border-radius: 10px;
+  background: var(--panel);
+}
+
+.export-card textarea {
+  flex: 1;
+  min-height: 340px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 13px;
+  line-height: 1.5;
+  resize: none;
+}
+
+.export-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+/* ---------- acts: the slide overview, and the act dividers ---------- */
+
+/* Only decks whose program entry lists acts get any of this (app.js builds
+   the rows and the rail from that one list). One row per slide, grouped
+   under its act; the act heading carries the clock time the act opens at,
+   which is the number that matters while rehearsing. */
+.act-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 16px 12px 4px;
+  padding-bottom: 5px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.deck-outline > .act-head:first-child { margin-top: 4px; }
+
+.act-name {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.62);
+}
+
+.act-time {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  color: rgba(255, 255, 255, 0.38);
+}
+
+.act-group { display: flex; flex-direction: column; gap: 1px; }
+
+/* An act that opens on a divider is one row, not a heading and a row under
+   it saying the same thing: the deck icon where a slide carries its number,
+   the title in the sidebar's own weight, and the act's time on the right. */
+.nav-item.slide-item.act-row {
+  grid-template-columns: 22px 1fr auto;
+  margin-top: 14px;
+  padding-top: 9px;
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
+  align-items: center;
+}
+
+.deck-outline > .act-group:first-child .act-row {
+  margin-top: 4px;
+}
+
+.nav-item.act-row svg {
+  width: 15px;
+  height: 15px;
+  justify-self: center;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.nav-item.act-row[aria-current="page"] svg { color: inherit; }
+
+.nav-item.act-row .slide-label {
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.nav-item.act-row .act-time { font-size: 10.5px; }
+
+/* the outline stands in for the deck's own entry: it names the deck on its
+   cover row already */
+.nav-item.has-outline { display: none; }
+
+.nav-item.slide-item {
+  display: grid;
+  grid-template-columns: 22px 1fr;
+  gap: 8px;
+  align-items: baseline;
+  padding: 6px 12px;
+  font-size: 13.5px;
+  line-height: 1.35;
+}
+
+.slide-num {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 10.5px;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  color: rgba(255, 255, 255, 0.32);
+}
+
+.nav-item.slide-item[aria-current="page"] .slide-num { color: inherit; }
+
+.slide-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* a divider row is the act's own opener: it reads as a heading, not a slide */
+.nav-item.is-divider .slide-label {
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.nav-item.is-divider:not(.act-row) .slide-num::before {
+  content: "\25B8";
+  color: rgba(255, 255, 255, 0.3);
+}
+
+/* Full-bleed and dark against the light body slides, so an act break
+   registers from the back of the room. One treatment for every act: what
+   changes is the progress rail, which answers "where are we" rather than
+   decorating. A project that wants its own colour overrides this rule. */
+.deck.clean .slide.divider {
+  position: relative;
+  justify-content: center;
+  padding: 0;
+  overflow: hidden;
+  background-color: #0f1013;
+  background-image:
+    radial-gradient(70% 60% at 64% 32%, rgba(113, 75, 103, 0.34), transparent 68%),
+    radial-gradient(55% 55% at 4% 6%, rgba(255, 255, 255, 0.055), transparent 74%),
+    radial-gradient(60% 60% at 96% 98%, rgba(0, 0, 0, 0.55), transparent 70%),
+    linear-gradient(150deg, #17181d 0%, #0d0e11 58%, #131419 100%);
+  color: #fff;
+}
+
+.divider-body {
+  position: relative;
+  width: 100%;
+  padding: 0 9cqw;
+  display: flex;
+  flex-direction: column;
+  gap: 2.4cqw;
+}
+
+/* app.js fills this with "Act n of m" - an act left out of the count keeps
+   it empty, and the element can be left out of the markup altogether */
+.divider-eyebrow {
+  margin: 0;
+  font-family: "Geist", inherit;
+  font-size: calc(1.55cqw * var(--content-scale, 1));
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #e6a8dc;
+}
+
+.deck.clean .slide.divider h2 {
+  margin: 0;
+  font-family: "Caveat", ui-rounded, cursive;
+  font-size: calc(7.6cqw * var(--content-scale, 1));
+  font-weight: 700;
+  line-height: 0.98;
+  letter-spacing: 0;
+  color: #fff;
+}
+
+.divider-sub {
+  margin: 0;
+  max-width: 42cqw;
+  font-family: "Geist", inherit;
+  font-size: calc(2.05cqw * var(--content-scale, 1));
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+/* the rail: one segment per counted act, this one lit */
+.deck.clean .slide.divider .prog {
+  display: flex;
+  gap: 0.5cqw;
+  margin-top: 1.4cqw;
+  width: 38cqw;
+}
+
+.deck.clean .slide.divider .prog span {
+  height: 0.42cqw;
+  flex: 1;
+  border-radius: 0.3cqw;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.deck.clean .slide.divider .prog span.on { background: #e6a8dc; }
+
+/* ---------- the clean slides ---------- */
+
+/* A quieter presentation language, meant to replace the template's marker
+   strokes and handwriting deck by deck: one sans face at real weights, one
+   accent, hairlines for structure, and the same head, body and foot on every
+   slide. A deck opts in with the "clean" class. */
+
+.deck.clean .slide {
+  /* --ink/--ink-2/--quiet/--line predate the palette system (assets/
+     palettes/) and used to hardcode their own colours here, independently
+     of it - every one of the many places below already reading them as
+     var(--ink) etc. now follows the active palette for free. --ink-2 has
+     no direct equivalent (a third, in-between tier the palette tokens
+     don't have) - color-mix gives it one without adding a token every
+     palette file would then have to define too. */
+  --ink: var(--text);
+  --ink-2: color-mix(in srgb, var(--text) 60%, var(--muted) 40%);
+  --quiet: var(--muted);
+  --line: var(--border);
+  justify-content: flex-start;
+  gap: 0;
+  padding: 4.6cqw 5.6cqw 4.1cqw;
+  background: var(--panel);
+  color: var(--ink);
+  font-family: "Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+/* the head: a small-caps line, the title, sometimes a lead sentence */
+.clean .slide-head {
+  display: flex;
+  flex-direction: column;
+  gap: 1.15cqw;
+}
+
+.clean .eyebrow {
+  margin: 0;
+  color: var(--accent);
+  font-size: max(9px, calc(0.95cqw * var(--content-scale, 1)));
+  font-weight: 500;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.clean .slide h2 {
+  margin: 0;
+  font-family: inherit;
+  font-size: max(24px, calc(4.4cqw * var(--content-scale, 1)));
+  font-weight: 600;
+  line-height: 1.02;
+  letter-spacing: -0.028em;
+}
+
+.clean .slide .lead {
+  max-width: 72%;
+  margin: 0.5cqw 0 0;
+  font-family: inherit;
+  font-size: max(11px, calc(1.55cqw * var(--content-scale, 1)));
+  line-height: 1.45;
+  color: var(--ink-2);
+}
+
+/* the body takes what the head and the foot leave, and its rows stretch to
+   fill it: the foot's hairline is the last rule of every table */
+.clean .slide-body {
+  /* never below its own text, so rows never paint over the foot - if that
+     leaves the slide taller than its box, fitSlide() (app.js) scales it down */
+  flex: 1 0 auto;
+  display: flex;
+  flex-direction: column;
+  margin-top: 3.4cqw;
+}
+
+/* the two tables read as two things: a wide gutter keeps them apart */
+.clean .slide-body.two-col {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr;
+  column-gap: 12cqw;
+}
+
+.clean .two-col > section {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* a small-caps label names a table */
+.clean .slide h3.label {
+  margin: 0 0 1.1cqw;
+  font-family: inherit;
+  font-size: max(9px, calc(0.95cqw * var(--content-scale, 1)));
+  font-weight: 500;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--quiet);
+}
+
+/* rows with a hairline between them: a key, then what it says. They share
+   the body's height equally, and never shrink under their own text */
+.clean .rows {
+  --key: 12cqw;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.clean .rows li {
+  flex: 1 0 auto;
+  display: grid;
+  grid-template-columns: var(--key) 1fr;
+  align-items: baseline;
+  align-content: center;
+  column-gap: 2cqw;
+  margin: 0;
+  padding: 1.4cqw 0;
+  border-top: 1px solid var(--line);
+  font-family: inherit;
+  font-size: max(12px, calc(1.75cqw * var(--content-scale, 1)));
+  line-height: 1.35;
+}
+
+.clean .rows .key {
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.clean .rows p { margin: 0; }
+
+/* a key with several lines to it */
+.clean .rows li > div {
+  display: grid;
+  gap: 0.45cqw;
+}
+
+/* the days are two blocks, not a table: no hairline between them, a quiet
+   ground under each, and only the gap of a card between the two */
+.clean .rows.days {
+  flex: 0 1 auto;
+  gap: 1cqw;
+  justify-content: center;
+}
+
+.clean .rows.days li {
+  flex: 0 0 auto;
+  padding: 1.6cqw 1.8cqw;
+  border-top: 0;
+  border-radius: 4px;
+  /* --card: a nested card's own token, not --panel (the slide's own
+     background already) - each palette picks what a card sitting on top of
+     its slide should look like (see assets/palettes/) */
+  background: var(--card);
+  font-size: max(13px, calc(2cqw * var(--content-scale, 1)));
+}
+
+/* numbered rows: the number, a title, a line about it */
+.clean .rows.numbered li {
+  grid-template-columns: 4.5cqw 27cqw 1fr;
+  padding: 2cqw 0;
+}
+
+.clean .rows .num {
+  color: var(--accent);
+  font-size: max(9px, calc(1.15cqw * var(--content-scale, 1)));
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  font-variant-numeric: tabular-nums;
+}
+
+.clean .rows h3 {
+  margin: 0;
+  font-family: inherit;
+  font-size: max(14px, calc(2.3cqw * var(--content-scale, 1)));
+  font-weight: 500;
+  letter-spacing: -0.015em;
+  text-transform: none;
+  color: var(--ink);
+}
+
+.clean .rows.numbered p {
+  max-width: 42cqw;
+  color: var(--ink-2);
+  font-size: max(11px, calc(1.55cqw * var(--content-scale, 1)));
+  line-height: 1.45;
+}
+
+/* a bullet list, centred in the body both ways: the item, then a line
+   about it. The block shrinks to its widest line, the items stay ragged
+   left inside it */
+.clean .bullets {
+  display: grid;
+  gap: 3.2cqw;
+  width: fit-content;
+  max-width: 100%;
+  margin: auto;
+  padding: 0;
+  list-style: none;
+}
+
+.clean .bullets li {
+  position: relative;
+  margin: 0;
+  padding-left: 2.8cqw;
+  font-family: inherit;
+}
+
+.clean .bullets li::before {
+  content: "";
+  position: absolute;
+  top: 0.95cqw;
+  left: 0;
+  width: 0.6cqw;
+  height: 0.6cqw;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.clean .bullets h3 {
+  margin: 0;
+  font-family: inherit;
+  font-size: max(14px, calc(2.3cqw * var(--content-scale, 1)));
+  font-weight: 500;
+  line-height: 1.25;
+  letter-spacing: -0.015em;
+  text-transform: none;
+  color: var(--ink);
+}
+
+.clean .bullets p {
+  max-width: 48cqw;
+  margin: 0.5cqw 0 0;
+  color: var(--ink-2);
+  font-size: max(11px, calc(1.55cqw * var(--content-scale, 1)));
+  line-height: 1.45;
+}
+
+/* the foot: one practical line under a hairline, the deck's name at the
+   far right, for the full screen where the sidebar is gone */
+.clean .slide-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.6cqw 4cqw;
+  margin-top: auto;
+  padding-top: 1.6cqw;
+  border-top: 1px solid var(--line);
+  color: var(--quiet);
+  font-size: max(9px, calc(1.3cqw * var(--content-scale, 1)));
+}
+
+/* --footer-brand is set from config.js's title, in app.js - a quoted CSS
+   string, so it defaults cleanly to nothing if a project sets none */
+.clean .slide-foot::after {
+  content: var(--footer-brand, "");
+  margin-left: auto;
+}
+
+.clean .slide-foot p { margin: 0; }
+
+.clean .slide-foot .k { margin-right: 0.9cqw; }
+
+.clean .slide-foot code {
+  padding: 0;
+  background: none;
+  color: var(--ink);
+  font-size: max(10px, calc(1.35cqw * var(--content-scale, 1)));
+}
+
+/* a key that runs long: a flag, a path, a phrase */
+.clean .rows.wide-key { --key: 17cqw; }
+
+.clean .rows .key code { font-size: 0.92em; }
+
+/* a cell never widens its column: a long path breaks instead */
+.clean .rows li > * { min-width: 0; }
+
+.clean .rows code { overflow-wrap: anywhere; }
+
+/* a table: the same hairline rows, with as many columns as the content
+   needs, and a small-caps head row naming them */
+.clean .rows.table { --cols: 1fr 1fr; }
+
+.clean .rows.table li {
+  grid-template-columns: var(--cols);
+  padding: 1.1cqw 0;
+  font-size: max(11px, calc(1.55cqw * var(--content-scale, 1)));
+  line-height: 1.4;
+}
+
+.clean .rows.table li.head {
+  flex: 0 0 auto;
+  padding: 0 0 1.1cqw;
+  border-top: 0;
+  color: var(--quiet);
+  font-size: max(9px, calc(0.95cqw * var(--content-scale, 1)));
+  font-weight: 500;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.clean .rows.table h3 { font-size: max(13px, calc(1.9cqw * var(--content-scale, 1))); }
+
+.clean .rows.table p {
+  max-width: 34cqw;
+  color: var(--ink-2);
+  font-size: max(11px, calc(1.45cqw * var(--content-scale, 1)));
+}
+
+.clean .rows.table .quiet { color: var(--quiet); }
+
+/* statement slides: a cover, a question, an answer. The head sits in the
+   middle of the slide and the foot keeps its place. An inverse slide swaps
+   ground and ink, for the one line of a deck that has to land */
+.clean .statement .slide-head {
+  margin: auto 0;
+  gap: 1.6cqw;
+}
+
+/* the foot gives up its auto margin, so the head centres above it */
+.clean .statement .slide-foot { margin-top: 0; }
+
+.clean .statement h2 {
+  max-width: 84%;
+  font-size: max(30px, calc(6cqw * var(--content-scale, 1)));
+}
+
+.clean .cover h2 { font-size: max(36px, calc(7.4cqw * var(--content-scale, 1))); }
+
+.clean .statement .lead {
+  max-width: 62%;
+  font-size: max(12px, calc(1.8cqw * var(--content-scale, 1)));
+}
+
+.deck.clean .slide.inverse {
+  --ink: #fff;
+  --ink-2: #c9ccd2;
+  --quiet: #8e929a;
+  --line: #3b3e45;
+  --accent: #c9a3c0;
+  background: #1b1d21;
+}
+
+/* code in a sentence: the mono face alone marks it, no pill */
+.clean .slide code {
+  padding: 0;
+  background: none;
+  color: var(--ink);
+  font-size: 0.9em;
+}
+
+.clean .slide pre code { font-size: inherit; }
+
+.clean .slide pre {
+  padding: 1.5cqw 1.8cqw;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--card);
+  font-size: max(8px, calc(1.25cqw * var(--content-scale, 1)));
+  line-height: 1.55;
+}
+
+/* what the slide points at: a tint of the accent, no marker stroke */
+.clean .slide pre mark {
+  padding: 0 2px;
+  border-radius: 2px;
+  background: var(--accent-soft);
+  color: inherit;
+  font-weight: 600;
+}
+
+.clean .caption {
+  margin: 1cqw 0 0;
+  color: var(--quiet);
+  font-size: max(9px, calc(1.25cqw * var(--content-scale, 1)));
+  text-align: left;
+}
+
+/* a file tree, in the panel a code sample gets: it is a listing like any
+   other, and on the bare slide it read as loose text beside the notes */
+.clean .slide pre.tree {
+  flex: 1;
+  font-size: max(9px, calc(1.35cqw * var(--content-scale, 1)));
+  line-height: 1.5;
+}
+
+.clean .slide pre.tree mark {
+  background: none;
+  color: var(--accent);
+}
+
+/* a code panel beside its notes, two even panels, a tree beside its notes */
+.clean .slide-body.two-col.code {
+  grid-template-columns: 1.15fr 1fr;
+  column-gap: 5cqw;
+}
+
+.clean .slide-body.two-col.even {
+  grid-template-columns: 1fr 1fr;
+  column-gap: 4cqw;
+}
+
+.clean .slide-body.two-col.tree {
+  grid-template-columns: 0.8fr 1fr;
+  column-gap: 7cqw;
+}
+
+/* the panel runs to the depth of the body, so the notes and the code end
+   on the same line */
+.clean .two-col > section > .code-block {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.clean .two-col > section > .code-block > pre { flex: 1; }
+
+.clean .two-col > section > .code-block + .code-block { margin-top: 1.2cqw; }
+
+/* but a section that stacks several panels sizes each one to its own code:
+   sharing the depth equally clips the longest sample */
+.clean .two-col > section > .code-block:not(:only-of-type) { flex: 0 0 auto; }
+
+/* a screenshot, in the same box a drawn figure gets: capped the same way, so
+   a picture and a diagram sit at the same size on the slide */
+.clean .figure.shot img {
+  display: block;
+  max-width: 100%;
+  max-height: 30cqw;
+  margin: 0 auto;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+}
+
+/* a figure, inline svg drawn on a 1000-wide grid: hairline boxes, the
+   server in grey, JavaScript in a tint of the accent, arrows in the ink */
+.clean figure.figure {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 0;
+  margin: 0;
+}
+
+.clean .figure svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 30cqw;
+  overflow: visible;
+}
+
+.clean .figure.timeline {
+  flex: 0 0 auto;
+  margin-bottom: 1.5cqw;
+}
+
+.clean .figure.timeline svg { max-height: 13cqw; }
+
+.clean .figure text {
+  font-family: inherit;
+  fill: var(--ink);
+  text-anchor: middle;
+}
+
+.clean .figure .lane {
+  font-size: 18px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  text-anchor: start;
+}
+
+.clean .figure .t { font-size: 18px; font-weight: 500; }
+.clean .figure .s { font-size: 13px; fill: var(--quiet); }
+
+.clean .figure .m {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 13px;
+}
+
+.clean .figure .mt { font-size: 15px; font-weight: 500; }
+.clean .figure .ms { font-size: 12px; }
+.clean .figure .l { text-anchor: start; }
+.clean .figure .r { text-anchor: end; }
+
+/* cards instead of rows: things to pick between, or a handful of names that
+   belong together and are read at a glance rather than down. --box-cols says
+   how many across (two by default), .tinted puts them on the accent. */
+.clean .rows.boxes {
+  display: grid;
+  grid-template-columns: repeat(var(--box-cols, 2), 1fr);
+  gap: 1.4cqw;
+  align-content: center;
+}
+
+.clean .rows.boxes li {
+  display: block;
+  padding: 2.4cqw 2.6cqw;
+  border-top: 0;
+  border-radius: 6px;
+  background: var(--card);
+}
+
+.clean .rows.boxes.tinted li {
+  background: var(--accent-soft);
+  text-align: center;
+}
+
+.clean .rows.boxes p {
+  margin-top: 0.9cqw;
+  color: var(--ink-2);
+  font-size: max(11px, calc(1.6cqw * var(--content-scale, 1)));
+  line-height: 1.45;
+}
+
+/* a line of small print under a box's own words: a route, a path */
+.clean .rows.boxes .meta {
+  margin-top: 1.2cqw;
+  color: var(--quiet);
+  font-size: max(10px, calc(1.35cqw * var(--content-scale, 1)));
+}
+
+/* --card, not --panel (the slide's own background already) - see
+   .clean .rows.days li above for the same call */
+.clean .figure .bx {
+  fill: var(--card);
+  stroke: var(--border);
+  stroke-width: 1.5;
+}
+
+/* the server, as against the browser: both were --card, which left two of
+   the three legend swatches identical. A tint of --cyan reads as "not the
+   browser" without competing with the accent, which means JavaScript. */
+.clean .figure .srv {
+  fill: color-mix(in srgb, var(--cyan) 13%, var(--card));
+  stroke: color-mix(in srgb, var(--cyan) 50%, var(--border));
+}
+
+.clean .figure .js {
+  fill: var(--accent-soft);
+  stroke: var(--accent-light);
+}
+
+.clean .figure .chip {
+  fill: none;
+  stroke: var(--border);
+  stroke-width: 1.2;
+  stroke-dasharray: 4 4;
+}
+
+.clean .figure .ar,
+.clean .figure .axis,
+.clean .figure .tick {
+  fill: none;
+  stroke: var(--ink-2);
+  stroke-width: 1.6;
+}
+
+.clean .figure .rt {
+  fill: none;
+  stroke: var(--quiet);
+  stroke-width: 1.4;
+  stroke-dasharray: 5 5;
+}
+
+.clean .figure .bound {
+  fill: none;
+  stroke: var(--ink-2);
+  stroke-width: 1.4;
+  stroke-dasharray: 7 5;
+}
+
+.clean .figure marker path {
+  fill: var(--ink-2);
+  stroke: none;
+}
+
+.clean .figure marker.rt-head path { fill: var(--quiet); }
+
+/* notes under a title: the two or three remarks a code slide makes before
+   its panels, in the ink of a lead */
+.clean .notes {
+  display: grid;
+  gap: 0.5cqw;
+  max-width: 80%;
+  margin: 0.4cqw 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.clean .notes li {
+  position: relative;
+  margin: 0;
+  padding-left: 1.6cqw;
+  color: var(--ink-2);
+  font-family: inherit;
+  font-size: max(11px, calc(1.45cqw * var(--content-scale, 1)));
+  line-height: 1.4;
+}
+
+/* notes at the head of a column, above its panel: the column's width */
+.clean .two-col .notes {
+  max-width: none;
+  margin: 0 0 1.4cqw;
+}
+
+.clean .notes li::before {
+  content: "";
+  position: absolute;
+  top: 0.75cqw;
+  left: 0;
+  width: 0.5cqw;
+  height: 0.5cqw;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+/* a file name labels a panel: the mono face, no small caps */
+.clean .slide h3.label.file {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: max(10px, calc(1.15cqw * var(--content-scale, 1)));
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+/* a walkthrough: the same two panels on several slides in a row, held in
+   a band of fixed height against the foot, so that only the highlight
+   moves from one slide to the next, whatever the head says above */
+.clean .walkthrough .slide-body {
+  flex: 0 0 27cqw;
+  margin-top: auto;
+}
+
+.clean .walkthrough .slide-foot { margin-top: 0; }
+
+/* twelve lines of template have to fit the band, with their padding */
+.clean .walkthrough pre {
+  font-size: max(8px, calc(1.15cqw * var(--content-scale, 1)));
+  line-height: 1.5;
+}
+
+/* a photograph holds the right column, cropped to the height the left
+   one takes */
+.clean .slide-body.two-col.picture {
+  grid-template-columns: 1.15fr 1fr;
+  column-gap: 6cqw;
+}
+
+.clean .two-col.picture .frame { position: relative; }
+
+.clean .two-col.picture .frame img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 4px;
+  object-fit: cover;
+}
+
+/* ---------- Odoo JS Ecosystem ---------- */
+
+/* the deck is written in the clean system; only its tables' columns are
+   its own */
+/* the three codebases, as three cards side by side */
+#deck-intro .rows.codebases { --box-cols: 3; }
+
+/* what Owl 3 brings, in two lines rather than a table. Two lines of text
+   left at the top of a slide read as a slide someone abandoned, so they sit
+   in a panel of their own, in the middle of the body, on the accent */
+#deck-intro .highlights {
+  margin: auto 0;
+  padding: 3.4cqw 4cqw;
+  border-radius: 8px;
+  background: var(--accent-soft);
+}
+
+/* a heading in the ink, not the quiet small caps every other label is */
+#deck-intro .highlights h3 {
+  margin: 0 0 1.4cqw;
+  font-size: max(16px, calc(3cqw * var(--content-scale, 1)));
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  text-transform: none;
+  color: var(--ink);
+}
+
+#deck-intro .highlights p {
+  margin: 0;
+  font-size: max(14px, calc(2.6cqw * var(--content-scale, 1)));
+  color: var(--ink);
+}
+
+#deck-intro .highlights .quiet { color: var(--ink-2); }
+#deck-intro .rows.compare { --cols: 15cqw 1fr 1fr; }
+
+/* ---------- The Odoo JS framework ---------- */
+
+/* the registry table: the category, what it holds, where it comes back */
+#deck-js-framework .rows.registries { --cols: 20cqw 1fr 22cqw; }
+
+/* the kinds of action: the type, what it is, who renders it */
+#deck-js-framework .rows.actions { --cols: 24cqw 1fr 24cqw; }
+
+/* the plugins the framework already starts: the class, what it gives you,
+   where it is imported from - the paths are long, so they take the room */
+#deck-js-framework-2 .rows.plugins { --cols: 18cqw 1fr 38cqw; }
+
+/* ---------- Views and fields ---------- */
+
+/* the two standard flows are two independent stories, not one list read
+   across: each one gets a card of its own, and the gap closes to match */
+#deck-views-fields .two-col.flows {
+  column-gap: 2.4cqw;
+}
+
+#deck-views-fields .two-col.flows > section {
+  padding: 2.2cqw 2.6cqw;
+  border-radius: 6px;
+  background: var(--card);
+}
+
+/* the view types: the three relational ones stacked on the left, the rest
+   two across on the right. Nine boxes and their lines is more than a slide
+   holds at the usual padding, and a box's padding is not something
+   fitSlide() can shrink - so they run tighter here. */
+#deck-views-fields .slide-body.two-col.view-types { grid-template-columns: 2fr 3fr; }
+
+#deck-views-fields .rows.relational { --box-cols: 1; }
+#deck-views-fields .rows.others { --box-cols: 2; }
+
+#deck-views-fields .rows.relational,
+#deck-views-fields .rows.others { gap: 1cqw; }
+
+#deck-views-fields .rows.relational li,
+#deck-views-fields .rows.others li { padding: 1.5cqw 1.8cqw; }
+
+#deck-views-fields .rows.relational p,
+#deck-views-fields .rows.others p { margin-top: 0.5cqw; }
+
+/* the two ways to customize, side by side */
+#deck-customizing-views .rows.strategies { --box-cols: 2; }
+
+/* ---------- Advanced JS framework ---------- */
+
+/* the generic components: the name, what it does, the module it lives in */
+#deck-advanced .rows.generic { --cols: 16cqw 1fr 26cqw; }
+
+
+/* ---------- Owl ---------- */
+
+/* what each Owl deck is about, as five words across */
+#deck-owl .rows.goals,
+#deck-owl-app .rows.goals,
+#deck-views-fields .rows.goals { --box-cols: 5; }
+
+/* the component tree, beside the template that draws it: the tree is the
+   slide, the eight lines next to it only have to be readable */
+#deck-owl .slide-body.two-col.sub {
+  grid-template-columns: 1.5fr 1fr;
+  column-gap: 4cqw;
+}
+
+/* the syntax table: the directive, what it does, the example takes the rest */
+#deck-owl .rows.syntax { --cols: 17cqw 16cqw 1fr; }
+
+/* the four shapes of reactive data: three even columns */
+#deck-owl-app .rows.shapes { --cols: 1fr 1fr 1fr; }
+
+@media (max-width: 720px) {
+  body { flex-direction: column; }
+  .sidebar { width: 100%; flex: 0 0 auto; }
+  .sidebar.collapsed { width: 100%; height: 44px; padding-top: 6px; padding-bottom: 6px; overflow: hidden; }
+  .slide { max-width: none; }
+}

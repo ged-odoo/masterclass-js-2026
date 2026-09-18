@@ -1,0 +1,44 @@
+/* "Tokyo Night" - the popular editor/terminal colour scheme
+   (github.com/folke/tokyonight.nvim), its "Night" variant for the dark
+   face. Tokyo Night is designed and known as a dark theme first - its
+   light face here is this project's own contrast-tuned reading of the
+   same hues (darker, less saturated, so they read on a light background),
+   not a literal port of a specific official light variant. */
+
+[data-palette="tokyo-night"] {
+  --bg: #d5d6db;
+  --panel: #e1e2e7;
+  --card: #c8cbdb;
+  --sidebar: #16161e;
+  --sidebar-text: #a9b1d6;
+  --sidebar-active: #c0caf5;
+  --text: #343b58;
+  --muted: #6c6e75;
+  --border: #c0c6dc;
+  --accent: #5a4a78;
+  --accent-soft: #ece9f5;
+  --accent-light: #8c76b0;
+  --pink: #8c4351;
+  --cyan: #0f4b6e;
+  --yellow: #8f5e15;
+  --lavender: #6a71b0;
+}
+
+[data-palette="tokyo-night"][data-theme="dark"] {
+  --bg: #16161e;
+  --panel: #1a1b26;
+  --card: #292e42;
+  --sidebar: #16161e;
+  --sidebar-text: #a9b1d6;
+  --sidebar-active: #c0caf5;
+  --text: #c0caf5;
+  --muted: #a9b1d6;
+  --border: #3b4261;
+  --accent: #bb9af7;
+  --accent-soft: #2d2b55;
+  --accent-light: #d5c4fa;
+  --pink: #f7768e;
+  --cyan: #7dcfff;
+  --yellow: #e0af68;
+  --lavender: #9d7cd8;
+}

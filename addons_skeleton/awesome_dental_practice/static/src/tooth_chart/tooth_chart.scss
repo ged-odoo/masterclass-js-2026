@@ -1,0 +1,48 @@
+.dental-charting {
+    border: 1px solid #cacaca;
+    padding: 30px;
+    margin: 50px;
+
+    .chart {
+        background: #fff;
+        text-align: center;
+    }
+
+    .parent {
+        fill: white;
+        cursor: pointer;
+        stroke: #000000;
+        stroke-width: 1;
+        stroke-linecap: butt;
+        stroke-linejoin: miter;
+        stroke-miterlimit: 4;
+        stroke-opacity: 1;
+        stroke-dasharray: none
+    }
+
+    text {
+        font-size: 10.13467216px;
+        font-style: normal;
+        font-weight: normal;
+        line-height: 125%;
+        letter-spacing: 0px;
+        word-spacing: 0px;
+        fill: #000000;
+        fill-opacity: 1;
+        stroke: none;
+        font-family: Sans
+    }
+}
+
+// Set all the colors but the "no-color" one
+@for $size from 2 through length($o-colors) {
+    .o_dental_chart_tooth_color_#{$size - 1} {
+        $-bg: adjust-color(nth($o-colors, $size), $lightness: 25%, $saturation: 15%);
+        @include o-print-color($-bg, fill, bg-opacity);
+    }
+}
+
+// Set the "no-color", a white background
+.o_dental_chart_tooth_color_0 {
+    fill: white;
+}

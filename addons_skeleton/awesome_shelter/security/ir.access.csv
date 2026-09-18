@@ -1,0 +1,4 @@
+id,name,model_id,group_id/id,operation,domain
+awesome_shelter.access_shelter_animal,access_shelter_animal,awesome_shelter.animal,base.group_user,crud,
+awesome_shelter.access_shelter_animal_type,access_shelter_animal_type,awesome_shelter.animal_type,base.group_user,crud,
+awesome_shelter.access_shelter_animal_race,access_shelter_animal_race,awesome_shelter.animal_race,base.group_user,crud,
