@@ -6899,14 +6899,75 @@ method of the same name on `ToothChartField`. Add a "Mouth Care" button next to
 it, calling a `mouthCareSelected` method.
 
 Both methods, for now, can stay empty - part 3 is where they open the wizard.
-You'll also need to pass `tooth`: for now, `{}` works, since nothing reads a
-tooth's `color` or `tooltipInfo` until part 2.
+You'll also need to pass `tooth`: part 2's SVG unconditionally reads every
+tooth's `color`/`tooltipInfo`, for all 32 teeth, on every render, so `{}`
+isn't enough - build a default entry for each tooth number instead (`color: 0`,
+`tooltipInfo` a JSON string of `{data: []}`, since that's the shape part 2's
+tooltip already expects). Part 2 (next) is where that default gets replaced by
+the record's real data.
 
 <details>
 <summary>Show solution</summary>
 
-Only the template changes in this step - the `js` side comes with part 2, once
-there's something for `toothSelected` and `mouthCareSelected` to actually do.
+`static/src/fields/tooth_chart_field.js`, a default `toothData` covering all
+32 teeth, and `ToothChart` registered as a sub component:
+
+<div class="diff-cols">
+<div class="before">
+<h4>Before</h4>
+
+<pre><code class="language-javascript">import { Component, useProps } from "@odoo/owl";
+import { _t } from "@web/core/l10n/translation";
+import { registry } from "@web/core/registry";
+import { standardFieldProps } from "@web/views/fields/standard_field_props";
+
+class ToothChartField extends Component {
+    static template = "awesome_dental_practice.ToothChartField";
+
+    props = useProps({
+        name: standardFieldProps.name,
+        record: standardFieldProps.record,
+    });
+}</code></pre>
+
+</div>
+<div class="after">
+<h4>After</h4>
+
+<pre><code class="language-javascript">import { Component, useProps } from "@odoo/owl";
+import { _t } from "@web/core/l10n/translation";
+import { registry } from "@web/core/registry";
+import { standardFieldProps } from "@web/views/fields/standard_field_props";
+import { ToothChart } from "../tooth_chart/tooth_chart";
+
+const TOOTH_NUMBERS = [
+    11, 12, 13, 14, 15, 16, 17, 18,
+    21, 22, 23, 24, 25, 26, 27, 28,
+    31, 32, 33, 34, 35, 36, 37, 38,
+    41, 42, 43, 44, 45, 46, 47, 48,
+];
+
+class ToothChartField extends Component {
+    static template = "awesome_dental_practice.ToothChartField";
+    static components = { ToothChart };
+
+    props = useProps({
+        name: standardFieldProps.name,
+        record: standardFieldProps.record,
+    });
+    toothData = Object.fromEntries(
+        TOOTH_NUMBERS.map((n) => [n, { color: 0, tooltipInfo: JSON.stringify({ data: [] }) }])
+    );
+
+    toothSelected(tooth) {}
+
+    mouthCareSelected() {}
+}</code></pre>
+
+</div>
+</div>
+
+`static/src/fields/tooth_chart_field.xml`
 
 <div class="diff-cols">
 <div class="before">
@@ -6927,7 +6988,7 @@ there's something for `toothSelected` and `mouthCareSelected` to actually do.
 &lt;templates xml:space="preserve"&gt;
     &lt;t t-name="awesome_dental_practice.ToothChartField"&gt;
         &lt;div&gt;
-            &lt;ToothChart tooth="this.toothData()" tooltipTemplate="'awesome_dental_practice.Tooltip'" toothSelected.bind="this.toothSelected"/&gt;
+            &lt;ToothChart tooth="this.toothData" tooltipTemplate="'awesome_dental_practice.Tooltip'" toothSelected.bind="this.toothSelected"/&gt;
             &lt;button type="button" class="btn btn-secondary mt-2" t-on-click="() => this.mouthCareSelected()"&gt;Mouth Care&lt;/button&gt;
         &lt;/div&gt;
     &lt;/t&gt;
@@ -6985,16 +7046,19 @@ recomputes on its own whenever that changes. Only interventions where
 `dental_care_type` is `"tooth"` or `"part"` belong on a numbered tooth - a
 `"mouth"` intervention has no `dental_tooth` at all.
 
-`t-att-data-tooltip-info` needs a JSON *string*, not an object - add a second
-`computed()`, `toothData`, deriving from the first, that `JSON.stringify`s each
-tooth's `tooltipInfo`. Pass `this.toothData()` as `<ToothChart>`'s `tooth` prop
-(the template change from part 1).
+`t-att-data-tooltip-info` needs a JSON *string*, not an object - keep
+`toothData` as the `<ToothChart>` `tooth` prop, but make it a second
+`computed()`, deriving from the first, that `JSON.stringify`s each tooth's
+`tooltipInfo`. The template's `this.toothData` becomes `this.toothData()`,
+now that it's callable.
 
 <details>
 <summary>Show solution</summary>
 
-`relatedFields`, `displayName` and the rest of the field's registration below
-the class don't change in this step - left out here, unchanged.
+`relatedFields`, `displayName`, `toothSelected`, `mouthCareSelected` and the
+rest of the field's registration below the class don't change in this step
+(the two methods stay the same empty stubs from part 1) - left out here,
+unchanged.
 
 <div class="diff-cols">
 <div class="before">
@@ -7004,15 +7068,26 @@ the class don't change in this step - left out here, unchanged.
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
+import { ToothChart } from "../tooth_chart/tooth_chart";
+
+const TOOTH_NUMBERS = [
+    11, 12, 13, 14, 15, 16, 17, 18,
+    21, 22, 23, 24, 25, 26, 27, 28,
+    31, 32, 33, 34, 35, 36, 37, 38,
+    41, 42, 43, 44, 45, 46, 47, 48,
+];
 
 class ToothChartField extends Component {
     static template = "awesome_dental_practice.ToothChartField";
+    static components = { ToothChart };
 
     props = useProps({
         name: standardFieldProps.name,
         record: standardFieldProps.record,
     });
-}</code></pre>
+    toothData = Object.fromEntries(
+        TOOTH_NUMBERS.map((n) => [n, { color: 0, tooltipInfo: JSON.stringify({ data: [] }) }])
+    );</code></pre>
 
 </div>
 <div class="after">
@@ -7070,6 +7145,23 @@ class ToothChartField extends Component {
         return toothData;
     });
 }</code></pre>
+
+</div>
+</div>
+
+`static/src/fields/tooth_chart_field.xml`, one word:
+
+<div class="diff-cols">
+<div class="before">
+<h4>Before</h4>
+
+<pre><code class="language-markup">&lt;ToothChart tooth="this.toothData" tooltipTemplate="'awesome_dental_practice.Tooltip'" toothSelected.bind="this.toothSelected"/&gt;</code></pre>
+
+</div>
+<div class="after">
+<h4>After</h4>
+
+<pre><code class="language-markup">&lt;ToothChart tooth="this.toothData()" tooltipTemplate="'awesome_dental_practice.Tooltip'" toothSelected.bind="this.toothSelected"/&gt;</code></pre>
 
 </div>
 </div>
