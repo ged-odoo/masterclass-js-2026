@@ -6,7 +6,8 @@ exercises start from.
 **[Open the masterclass →](https://ged-odoo.github.io/masterclass-js-2026/)**
 
 Everything is in there: the presentations, every exercise with its steps, and
-the solutions behind a "Show solution" button. "Print everything", at the foot
+the solutions behind a "Show solution" button. Under Bonus Content, at the
+foot of the sidebar, are the two OXP talks the masterclass grew out of. "Print everything", at the foot
 of the sidebar, lays the whole program out as one document you can save as a
 PDF.
 

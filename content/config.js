@@ -108,13 +108,24 @@ window.GAS_CONFIG = {
       ],
     },
     {
-      // "end" sends a group to the foot of the sidebar, under the loose
-      // entries (Collaborative Pad, Resources) the framework itself adds
+      // "end" sends a group to the foot of the sidebar, under Collaborative
+      // Pad and above Resources; "last", below, goes under Resources too
       topic: null,
       at: "end",
       items: [
         { type: "slides", id: "owl-2-vs-3", label: "Owl 2 vs Owl 3" },
         { type: "view", id: "odoosh", label: "Using odoo.sh" },
+      ],
+    },
+    {
+      // the two OXP talks, published beside this site and embedded here: a
+      // page each, holding the talk in an iframe, so nobody loses the
+      // masterclass to read one. Each page keeps a link to the real thing.
+      topic: "Bonus Content",
+      at: "last",
+      items: [
+        { type: "view", id: "talk1", label: "Talk: Introducing Owl 3" },
+        { type: "view", id: "talk2", label: "Talk: Advanced Reactivity" },
       ],
     },
   ],

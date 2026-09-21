@@ -1475,12 +1475,18 @@ body:has(dialog.source-dialog[open]) { overflow: hidden; }
 
 .pad-bar a:hover { text-decoration: underline; }
 
-#pad-frame {
+/* an embedded page fills what is left of the view under its bar */
+#pad-frame,
+.view-frame {
   flex: 1;
   width: 100%;
   min-height: 0;
   border: 0;
 }
+
+/* ?embed=1 (see app.js): inside another site's iframe, that site has the
+   sidebar and this one gives its width to the slides */
+html.embedded .sidebar { display: none; }
 
 /* ---------- edit mode ---------- */
 

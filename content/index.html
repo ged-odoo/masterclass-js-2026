@@ -104,6 +104,9 @@
        sets none -->
   <button class="nav-item" data-view="resources" hidden>Resources</button>
 
+  <!-- what the program sends past everything the framework adds: `at: "last"` -->
+  <div id="program-last"></div>
+
   <!-- the whole program as one document: every deck, exercise and page, in
        the order this sidebar lists them. A browser cannot hand a page a PDF
        file, so this opens the print dialog and "Save as PDF" does the rest -
@@ -9725,6 +9728,26 @@ command provider, and state persisted to (and migrated in) local storage.
 <section data-src="sections/82-resources/resources.html" data-src-kind="html-block" class="view page" id="view-resources" data-id="570163ba" hidden>
   <h2>Resources</h2>
   <div id="resources"></div>
+</section>
+
+<!-- sections/83-talks/talk1.html -->
+<section data-src="sections/83-talks/talk1.html" data-src-kind="html-block" class="view" id="view-talk1" data-id="3b7c50e1" data-print="skip" hidden>
+  <div class="pad-bar">
+    <span>Introducing Owl 3 — the OXP talk this masterclass grew out of.</span>
+    <a href="../talk1-introducing-owl3/" target="_blank" rel="noopener">Open in a new tab</a>
+  </div>
+  <iframe class="view-frame" data-src="../talk1-introducing-owl3/index.html?embed=1"
+          title="Introducing Owl 3"></iframe>
+</section>
+
+<!-- sections/83-talks/talk2.html -->
+<section data-src="sections/83-talks/talk2.html" data-src-kind="html-block" class="view" id="view-talk2" data-id="8f21a94d" data-print="skip" hidden>
+  <div class="pad-bar">
+    <span>Advanced Reactivity — the computation graph, stepped through.</span>
+    <a href="../talk2-advanced-reactivity/" target="_blank" rel="noopener">Open in a new tab</a>
+  </div>
+  <iframe class="view-frame" data-src="../talk2-advanced-reactivity/index.html?embed=1"
+          title="Advanced Reactivity"></iframe>
 </section>
 
   <!-- empty until "Print everything" fills it: every deck, exercise and page

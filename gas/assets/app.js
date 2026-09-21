@@ -8,6 +8,16 @@
 // gas/template.html and the project's sections/; its styles are
 // gas/assets/style.css.
 
+// ---------- embedded in another GAS site ----------
+
+// ?embed=1 says this page is in an iframe of another one, which has its own
+// sidebar: two of them side by side is a lot of furniture for a reader who
+// only wants the slides, so this one steps out of the way. The deck bar
+// stays - that is how you move through a deck with no rail to click.
+if (new URLSearchParams(location.search).get("embed") === "1") {
+  document.documentElement.classList.add("embedded");
+}
+
 // ---------- theme (light/dark) ----------
 //
 // The one personal, per-viewer choice - a stored pick, else the OS's own
@@ -274,6 +284,7 @@ function readStore(key, fallback) {
 
 const programEl = document.getElementById("program");
 const programEndEl = document.getElementById("program-end");
+const programLastEl = document.getElementById("program-last");
 // the topics are numbered by their place in the program, so adding one
 // anywhere renumbers the rest on its own
 let topicNumber = 0;
@@ -309,11 +320,15 @@ function openTopic(name) {
 // carries (see "a cover's topic number" below)
 const topicNumberOf = {};
 
+const PROGRAM_SLOTS = { end: programEndEl, last: programLastEl };
+
 for (const { topic, items, at } of PROGRAM) {
-  const into = at === "end" ? programEndEl : programEl;
+  const into = PROGRAM_SLOTS[at] || programEl;
   const group = document.createElement("div");
   group.className = topic ? "nav-group" : "nav-group flat";
-  const number = topic ? ++topicNumber : 0;
+  // the numbered topics are the program proper: a group sent to a slot at the
+  // foot of the sidebar is outside it, and keeps its name without a number
+  const number = topic && !at ? ++topicNumber : 0;
   for (const item of items) {
     if (number && item.type === "slides") {
       topicNumberOf[item.id] = number;
@@ -343,7 +358,7 @@ for (const { topic, items, at } of PROGRAM) {
       `stroke="currentColor" stroke-width="2" stroke-linecap="round" ` +
       `stroke-linejoin="round" aria-hidden="true">${ICONS.topic}</svg>` +
       `<span></span>`;
-    heading.querySelector("span").textContent = `${number}. ${topic}`;
+    heading.querySelector("span").textContent = number ? `${number}. ${topic}` : topic;
     const entry = { name: topic, heading, entries: group };
     heading.addEventListener("click", () => {
       foldTopic(entry, group.hidden);
@@ -1282,6 +1297,15 @@ function showView(name, itemId) {
   // load the pad the first time the section is opened, not on page load
   if (name === "pad" && padFrame && !padFrame.src) {
     padFrame.src = PAD_URL;
+  }
+  // same for any other embedded page: a section nobody opens costs nothing,
+  // which matters when the thing embedded is a whole site of its own
+  if (views[name]) {
+    for (const frame of views[name].querySelectorAll("iframe[data-src]")) {
+      if (!frame.src) {
+        frame.src = frame.dataset.src;
+      }
+    }
   }
   for (const item of navItems) {
     const current = name === "slides" ? currentDeck : currentProject;
@@ -2552,7 +2576,9 @@ function programElements() {
   const out = views.welcome ? [views.welcome] : [];
   for (const item of [...first, ...last]) {
     const el = (where[item.type] || {})[item.id];
-    if (el) {
+    // data-print="skip": a page that is a window onto somebody else's site
+    // prints as an empty box, so it is left out of the document
+    if (el && el.dataset.print !== "skip") {
       out.push(el);
     }
   }

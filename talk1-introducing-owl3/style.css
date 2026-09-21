@@ -1,0 +1,329 @@
+/* Introducing Owl 3 - this project's own styles, on top of gas/assets/style.css.
+   The act dividers and the slide overview are the engine's (a deck whose
+   program entry lists acts gets both); what is left here is this talk's own:
+   the cover, and the few table and card shapes its slides use. */
+
+/* ---------- the display face on every title ---------- */
+
+/* Branding: Caveat carries the cover and the act breaks, and it carries the
+   slide titles too, so the deck reads as one thing. Three things have to
+   move with the family - it only ships a bold, its x-height is far smaller
+   than Geist's at the same size, so the sizes go up to match, and the
+   tracking Geist was tightened by has to come back off. */
+.clean .slide h2 {
+  font-family: "Caveat", ui-rounded, cursive;
+  font-size: max(28px, calc(5.8cqw * var(--content-scale, 1)));
+  font-weight: 700;
+  line-height: 1.06;
+  letter-spacing: 0;
+}
+
+.clean .statement h2 {
+  font-size: max(34px, calc(7.4cqw * var(--content-scale, 1)));
+}
+
+/* ---------- the running title ---------- */
+
+/* gas prints the project's title in the corner of every slide foot. A talk
+   is one deck with its name on the cover, so the corner adds nothing and
+   the foot reads as one line. */
+.clean .slide-foot::after { content: none; }
+
+/* one owl keeping the last slide company, off to the right of the question */
+#deck-talk .slide.with-owl { position: relative; }
+
+#deck-talk .owl-corner {
+  position: absolute;
+  right: 8cqw;
+  top: 50%;
+  width: 25cqw;
+  transform: translateY(-50%);
+}
+
+#deck-talk .owl-corner svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+#deck-talk .owl-corner .owl-foot {
+  fill: none;
+  stroke: #d9922f;
+  stroke-width: 6;
+  stroke-linecap: round;
+}
+
+/* ---------- the three owls ---------- */
+
+/* The slide after the cover is the drawing and nothing else, so it takes the
+   depth a figure is normally not given. Strokes are set here rather than per
+   shape: one weight for the branch, the feet and a winking eye. */
+.clean .figure.owls svg { max-height: 40cqw; }
+
+.clean .figure.owls .owl-branch {
+  fill: none;
+  stroke: #c9b3a1;
+  stroke-width: 7;
+  stroke-linecap: round;
+}
+
+.clean .figure.owls .owl-foot,
+.clean .figure.owls .owl-line {
+  fill: none;
+  stroke: #d9922f;
+  stroke-width: 6;
+  stroke-linecap: round;
+}
+
+.clean .figure.owls .owl-line { stroke: #2a1c26; }
+
+/* ---------- the cover ---------- */
+
+/* The cover is the masterclass welcome screen, unchanged: the webp background,
+   the sticker art placed as the template places it, and the Odoo Experience
+   lockup. Those rules live further up this file at .slide.welcome (0,2,0) and
+   lose to .deck.clean .slide (0,3,0), which sets a white background, its own
+   padding and its own type - so they have to be restated, raised. */
+.deck.clean .slide.welcome {
+  position: relative;
+  justify-content: flex-start;
+  padding: 0;
+  overflow: hidden;
+  background: none;
+  color: #fff;
+}
+
+.deck.clean .slide.welcome h2 {
+  font-family: "Caveat", ui-rounded, cursive;
+  font-size: 8.3cqw;
+  font-weight: 700;
+  font-style: normal;
+  line-height: 0.975;
+  letter-spacing: 0;
+  color: #fff;
+  margin: 0;
+}
+
+.deck.clean .slide.welcome .lead {
+  font-family: "Geist", inherit;
+  font-size: 2.03cqw;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.92);
+  margin: 0;
+  max-width: none;
+}
+
+/* the component tree: taller than a figure's default, since it is the slide */
+.clean .figure.tree svg { max-height: 38cqw; }
+
+/* a screenshot: the browser's own frame is not in the image, so the figure
+   gives it an edge and a shadow to sit on */
+.clean .figure.shot {
+  flex: 1;
+  min-height: 0;
+  align-items: center;
+}
+
+.clean .figure.shot img {
+  max-width: 100%;
+  /* a percentage here resolves against a flex height the browser treats as
+     indefinite, and the image runs past the slide: cap it in the slide's
+     own units, as every other figure here does */
+  max-height: 38cqw;
+  object-fit: contain;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  box-shadow: 0 0.4cqw 1.2cqw rgba(0, 0, 0, 0.10);
+}
+
+/* ---------- this deck's tables ---------- */
+
+/* the two-by-two: a matrix wants its own depth, not a figure's default */
+.clean .figure.quadrants svg { max-height: 34cqw; }
+
+/* three zones rather than two: the same section styling, one column wider */
+#deck-talk .slide-body.two-col.three {
+  grid-template-columns: 1fr 1fr 1fr;
+  column-gap: 3cqw;
+}
+
+/* two lists of API names, as chips: what is gone is struck through and quiet,
+   what is new carries the accent tint the figures use for Owl 3 */
+#deck-talk .chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  gap: 0.7cqw;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+#deck-talk .chips li {
+  padding: 0.6cqw 1cqw;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: max(10px, 1.45cqw);
+  line-height: 1.2;
+}
+
+#deck-talk .chips.gone li {
+  border-color: var(--line);
+  background: var(--card);
+  color: var(--quiet);
+  text-decoration: line-through;
+  text-decoration-thickness: 1px;
+}
+
+#deck-talk .chips.new li {
+  border-color: var(--accent-light);
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+/* a rename is one chip, not two: the arrow carries the accent */
+#deck-talk .chips.changed li {
+  border-color: var(--line);
+  background: var(--panel);
+  color: var(--ink);
+}
+
+#deck-talk .chips .to {
+  padding: 0 0.2cqw;
+  color: var(--accent);
+}
+
+/* a name that stayed while its contract moved: the note says what changed */
+#deck-talk .chips .note {
+  /* the chip is mono; the note is prose, so it takes the text face back */
+  font-family: "Geist", ui-sans-serif, system-ui, sans-serif;
+  font-size: 0.86em;
+  color: var(--quiet);
+}
+
+/* the four reactive shapes, as four cards rather than four table rows: the
+   constructor leads each one, because the constructor is what you go looking
+   for when you are picking between them */
+#deck-talk .shape-grid {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-auto-rows: 1fr;
+  gap: 1.8cqw;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* A slide holding two whole components, class and template. Leading trades
+   against type size one for one under the auto-fit, so the room to win back
+   is the part that is not text: the padding inside each panel, and the gap
+   between a class and the template below it. */
+#deck-talk .slide-body.dense pre { padding: 0.9cqw 1.4cqw; }
+
+#deck-talk .slide-body.dense .code-block + .code-block { margin-top: 0.7cqw; }
+
+/* Panels as tall as their code, not as tall as the slide. The default is
+   the other way round, so a code panel and the notes beside it end on the
+   same line - but two short samples side by side just leave a lot of empty
+   box under the last line. */
+#deck-talk .slide-body.two-col.fit { align-items: start; }
+
+#deck-talk .slide-body.two-col.fit > section > .code-block,
+#deck-talk .slide-body.two-col.fit > section > .code-block > pre {
+  flex: 0 0 auto;
+}
+
+/* the three computations: the same cards, three across, and a numeral
+   where a shape has its constructor */
+#deck-talk .shape-grid.three {
+  grid-template-columns: 1fr 1fr 1fr;
+  /* three short cards: as tall as the tallest of them, not as tall as the
+     slide, and held in the middle of the body rather than stretched down it */
+  grid-auto-rows: auto;
+  align-content: center;
+}
+
+#deck-talk .shape-grid .num {
+  color: var(--accent);
+  font-size: max(9px, 1.15cqw);
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  font-variant-numeric: tabular-nums;
+}
+
+#deck-talk .shape-grid.three li { justify-content: flex-start; }
+
+#deck-talk .shape-grid li {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.6cqw;
+  padding: 1.8cqw 2.2cqw;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--card);
+}
+
+#deck-talk .shape-grid .shape {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: max(11px, 1.7cqw);
+  color: var(--ink);
+}
+
+#deck-talk .shape-grid h3 {
+  margin: 0;
+  font-family: inherit;
+  font-size: max(11px, 1.5cqw);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  text-transform: none;
+  color: var(--ink);
+}
+
+#deck-talk .shape-grid p {
+  margin: 0;
+  color: var(--quiet);
+  font-size: max(10px, 1.3cqw);
+}
+
+/* the shift: two trees, so the only thing that changes is where state sits */
+.clean .figure.shift svg { max-height: 34cqw; }
+
+.clean .figure.shift .dot { fill: var(--accent-light); }
+
+.clean .figure.shift .ar.thin { stroke-width: 1.2; }
+
+/* the three reactivity models: the two axes either side of the mechanism, so
+   that each row moves exactly one column against the row above it */
+#deck-talk .rows.models { --cols: 9cqw 17cqw 1fr 19cqw; }
+
+/* the four reactive shapes: three even columns */
+#deck-talk .rows.shapes { --cols: 1fr 1fr 1fr; }
+
+/* the change surface: the intent, what went, what was renamed */
+#deck-talk .rows.changes { --cols: 20cqw 1fr 1fr; }
+
+/* the migration table: the axis, then done against left */
+#deck-talk .rows.migration { --cols: 22cqw 1fr 1fr; }
+
+/* an arrow drawn in the accent, for the "Owl 3" pointer on the dial */
+.clean .figure .ar.js { stroke: var(--accent-light); }
+.clean .figure marker path { fill: var(--ink-2); }
+
+/* A code panel sharing its column with prose or a list is a specimen, not the
+   body of the slide: it should size to its content rather than stretch to fill
+   the column and leave a hole under it. */
+.clean .two-col > section > .code-block:has(~ .rows),
+.clean .two-col > section > .code-block:has(~ .caption),
+.clean .two-col > section > .caption ~ .code-block { flex: 0 0 auto; }
+
+/* a caption running straight into the next label needs air between them */
+.clean .caption + h3.label { margin-top: 1.5cqw; }
+
+/* a statement slide with nothing under it: no footer, so no hairline and no
+   deck name either. For the one-line claims that want the slide to themselves */
+.clean .slide.statement.bare .slide-head { border-bottom: 0; }
+
+
