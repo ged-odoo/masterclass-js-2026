@@ -23,12 +23,12 @@ Then clone this repository and start Odoo with it in the addons path:
 
 ```bash
 git clone https://github.com/ged-odoo/masterclass-js-2026.git
-odoo-bin --addons-path=...,masterclass-js-2026/addons_skeleton
+odoo-bin --addons-path=...,masterclass-js-2026
 ```
 
-`addons_skeleton/` holds the addons each exercise builds on. Install the one
-the exercise names - `awesome_dashboard`, `awesome_dental_practice`,
-`awesome_shelter`, `awesome_clicker` - and follow the steps.
+The repository itself is the addons directory: `awesome_dashboard`,
+`awesome_dental_practice`, `awesome_shelter` and `awesome_clicker` sit at the
+top level of it. Install the one the exercise names, and follow the steps.
 
 ## About this repository
 
