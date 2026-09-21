@@ -145,3 +145,36 @@
   font-size: 0.86em;
   color: var(--muted);
 }
+
+/* ---------- the welcome cover's own url ---------- */
+
+/* Where this site lives, for anyone reading it off a projector. Placed like
+   the artwork around it - a percentage of the slide, so it rides the same
+   scaling - and quiet enough to stay out of the way of the title. Indented
+   past the sparkle and the burst in that corner (at 6% and 8% from the left,
+   86% and 90% down), so it can sit low without printing over them. */
+.slide.welcome .welcome-url {
+  position: absolute;
+  left: 15%;
+  bottom: 5%;
+  margin: 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 1.5cqw;
+  letter-spacing: 0.02em;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+/* ---------- the url, where the title usually sits ---------- */
+
+/* Every slide signs itself "Masterclass Odoo JS" in the foot, from
+   config.js's title (--footer-brand, set in app.js). On the one slide people
+   photograph off a projector, the url is worth more than the name they are
+   already looking at. */
+.clean .slide.brand-url {
+  --footer-brand: "https://ged-odoo.github.io/masterclass-js-2026/";
+}
+
+.clean .slide.brand-url .slide-foot::after {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  color: var(--ink-2);
+}

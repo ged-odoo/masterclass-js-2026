@@ -2354,6 +2354,10 @@ html.embedded .sidebar { display: none; }
   column-gap: 7cqw;
 }
 
+/* ...unless the sample is a line or two: stretching one line to the depth of
+   the slide makes a tall empty box out of a short thought */
+.clean .two-col.snug > section > .code-block { flex: 0 0 auto; }
+
 /* the panel runs to the depth of the body, so the notes and the code end
    on the same line */
 .clean .two-col > section > .code-block {

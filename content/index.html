@@ -121,7 +121,7 @@
 
 <!-- sections/10-practical-details/slides.html -->
 <div data-src="sections/10-practical-details/slides.html" data-src-kind="html-block" class="deck clean" id="deck-practical">
-  <article class="slide" data-id="2664d849">
+  <article class="slide brand-url" data-id="2664d849">
     <header class="slide-head">
       <p class="eyebrow">Welcome</p>
       <h2>Practical details</h2>
@@ -164,7 +164,7 @@
       <ul class="bullets">
         <li><h3>Laptop and charger</h3><p>Your own machine, ready for two full days of coding.</p></li>
         <li><h3>GitHub account</h3><p>Signed in, and able to clone the training repository.</p></li>
-        <li><h3>Odoo development setup</h3><p>A local Odoo on the <code>master</code> branch, that starts — checked before Day 1. An <a href="https://www.odoo.sh">odoo.sh</a> project does just as well.</p></li>
+        <li><h3>Odoo development setup</h3><p>A local Odoo on <code>20.0</code> or <code>master</code>, that starts — checked before Day 1. An <a href="https://www.odoo.sh">odoo.sh</a> project does just as well.</p></li>
       </ul>
     </div>
   </article>
@@ -178,9 +178,9 @@
 
     <div class="slide-body">
       <ul class="bullets">
-        <li><h3>Create the project</h3><p>On <a href="https://www.odoo.sh">odoo.sh</a>, on the <code>master</code> branch — the version this masterclass is written against.</p></li>
+        <li><h3>Create the project</h3><p>On <a href="https://www.odoo.sh">odoo.sh</a>, on <code>20.0</code> or <code>master</code> — the versions this masterclass is written against.</p></li>
         <li><h3>Let it build</h3><p>The first build takes a while. Starting it the day before means starting Day 1 with a server that runs.</p></li>
-        <li><h3>Or run it locally</h3><p>A local Odoo on <code>master</code> does just as well, if you already have one that starts.</p></li>
+        <li><h3>Or run it locally</h3><p>A local Odoo on either does just as well, if you already have one that starts.</p></li>
       </ul>
     </div>
   </article>
@@ -436,7 +436,7 @@
     <div class="slide-body">
       <figure class="figure">
         <svg viewBox="0 0 1000 300" role="img"
-             aria-label="The static files of an addon, registered in the manifest, are combined by the Odoo server into one JS file and one CSS file that the browser loads once, at startup.">
+             aria-label="The static files of an addon, registered in the manifest, are combined by the Odoo server into one JS file - which carries the XML templates too - and one CSS file, that the browser loads once, at startup.">
           <defs>
             <marker id="eco-ar-3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
               <path d="M0 0 L10 5 L0 10 Z"/>
@@ -463,23 +463,22 @@
           <text class="s" x="500" y="178">minifies, caches</text>
           <text class="s" x="500" y="200">serves the result</text>
 
-          <path class="ar" marker-end="url(#eco-ar-3)" d="M618 150 H772"/>
-          <text class="s" x="695" y="136">one request each</text>
+          <path class="ar" marker-end="url(#eco-ar-3)" d="M618 150 H734"/>
+          <text class="s" x="676" y="136">two requests</text>
 
-          <rect class="bx" x="780" y="0" width="220" height="300" rx="6"/>
-          <text class="t" x="890" y="36">Browser</text>
-          <rect class="bx" x="796" y="70" width="188" height="40" rx="4"/>
-          <text class="m ms" x="890" y="95">web.assets_backend.min.js</text>
-          <rect class="bx" x="796" y="126" width="188" height="40" rx="4"/>
-          <text class="m ms" x="890" y="151">web.assets_backend.min.css</text>
-          <rect class="bx" x="796" y="182" width="188" height="40" rx="4"/>
-          <text class="m ms" x="890" y="207">the XML templates</text>
-          <text class="s" x="890" y="270">loaded once, at startup</text>
+          <rect class="bx" x="744" y="0" width="256" height="300" rx="6"/>
+          <text class="t" x="872" y="36">Browser</text>
+          <rect class="bx" x="760" y="86" width="224" height="60" rx="4"/>
+          <text class="m ms" x="872" y="110">web.assets_backend.min.js</text>
+          <text class="s" x="872" y="132">javascript and templates</text>
+          <rect class="bx" x="760" y="162" width="224" height="40" rx="4"/>
+          <text class="m ms" x="872" y="187">web.assets_backend.min.css</text>
+          <text class="s" x="872" y="252">loaded once, at startup</text>
         </svg>
       </figure>
     </div>
     <footer class="slide-foot">
-      <p>The Odoo server is the bundler. No npm, no webpack, no Node.js to install.</p>
+      <p>The Odoo server is the bundler. No npm, no webpack, no Node.js to install. The XML rides inside the js bundle, registered as a module of its own.</p>
     </footer>
   </article>
 
@@ -521,7 +520,7 @@ export class Dashboard extends Component {
     <div class="slide-body">
       <figure class="figure">
         <svg viewBox="0 0 1000 372" role="img"
-             aria-label="Owl at the bottom, the Odoo JS framework on top of it, then the web client, the website and the point of sale, and the apps above them. Owl, the framework and the web client live in addons/web.">
+             aria-label="Owl at the bottom, the Odoo JS framework on top of it - registries, services, views and fields - then the web client, the website and the point of sale, and the apps above them. Owl, the framework and the web client live in addons/web.">
           <rect class="chip" x="0" y="0" width="580" height="34" rx="6"/>
           <text class="s" x="290" y="22">accounting · crm · sale · project · every other app</text>
           <rect class="chip" x="610" y="0" width="180" height="34" rx="6"/>
@@ -531,7 +530,7 @@ export class Dashboard extends Component {
 
           <rect class="bx" x="0" y="50" width="580" height="84" rx="6"/>
           <text class="t" x="290" y="86">Web client</text>
-          <text class="s" x="290" y="108">navbar, menus, actions, views</text>
+          <text class="s" x="290" y="108">navbar, menus, systray, actions, …</text>
 
           <rect class="bx" x="610" y="50" width="180" height="84" rx="6"/>
           <text class="t" x="700" y="80">Website</text>
@@ -628,7 +627,7 @@ export class Dashboard extends Component {
     <div class="slide-body">
       <ul class="rows boxes">
         <li><h3>QWeb in Python</h3><p>Reports, website pages, emails. Rendered on the server, page by page.</p><p class="meta"><code>t-field</code> · <code>t-call</code></p></li>
-        <li><h3>QWeb in Owl</h3><p>Components. Compiled in the browser at startup, then re-rendered whenever the state it reads changes.</p><p class="meta"><code>t-on-click</code> · <code>t-ref</code> · <code>t-call-slot</code></p></li>
+        <li><h3>QWeb in Owl</h3><p>Components. Compiled in the browser the first time a template is needed, then re-rendered whenever the state it reads changes.</p><p class="meta"><code>t-on-click</code> · <code>t-ref</code> · <code>t-call-slot</code></p></li>
       </ul>
     </div>
     <footer class="slide-foot">
@@ -854,7 +853,7 @@ export class TodoList extends Component {
       </section>
     </div>
     <footer class="slide-foot">
-      <p>Called in <code>setup</code>, or as a class field. Never in an <code>if</code>, never in a loop.</p>
+      <p>Called while the component is being created: in <code>setup</code>, or as a class field. Not later, from a handler or a method.</p>
     </footer>
   </article>
 
@@ -1425,7 +1424,7 @@ class SomeComponent extends Component {
     <div class="slide-body">
       <figure class="figure">
         <svg viewBox="0 0 1000 216" role="img"
-             aria-label="Three phases, one after the other. On creation: setup, then onWillStart, then the first render, then onMounted. Then, on every re-render: onWillPatch, the patch, then onPatched. Then, on removal: onWillUnmount, then onWillDestroy.">
+             aria-label="Three phases, one after the other. On creation: setup, then onWillStart - the one hook that may be async, which the first render waits for - then the first render, then onMounted. Then, on every re-render: onWillPatch, the patch, then onPatched. Then, on removal: onWillUnmount, then onWillDestroy.">
           <defs>
             <marker id="owl-ar-2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
               <path d="M0 0 L10 5 L0 10 Z"/>
@@ -1443,7 +1442,8 @@ class SomeComponent extends Component {
           <path class="ar" marker-end="url(#owl-ar-2)" d="M344 22 H382"/>
 
           <rect class="bx" x="386" y="0" width="170" height="44" rx="6"/>
-          <text class="t" x="471" y="28">onWillStart</text>
+          <text class="t" x="471" y="22">onWillStart</text>
+          <text class="s" x="471" y="38">async — the render waits</text>
           <path class="ar" marker-end="url(#owl-ar-2)" d="M560 22 H598"/>
 
           <rect class="chip" x="602" y="0" width="170" height="44" rx="6"/>
@@ -2094,7 +2094,7 @@ export class Dashboard extends Component {
 
           <text class="s" x="450" y="268">registries</text>
 
-          <path class="ar" marker-end="url(#fw-ar-2)" d="M574 123 H696"/>
+          <path class="ar" marker-start="url(#fw-ar-2)" d="M574 123 H696"/>
           <text class="s" x="635" y="113">reads</text>
 
           <rect class="bx" x="700" y="71" width="300" height="104" rx="6"/>
@@ -2179,16 +2179,16 @@ registry.category("systray").add(
     <div class="slide-body two-col code">
       <section>
         <h3 class="label">Registry · keyed, like the ones above</h3>
-<pre><code class="language-javascript">import { Component, Registry, t } from "@odoo/owl";
+<pre><code class="language-javascript">import { Registry, t } from "@odoo/owl";
 
 const views = new Registry({
     name: "views",
-    <mark>validation: t.constructor(Component)</mark>,
+    <mark>validation: t.object({ type: t.string() })</mark>,
 });
 
-views.add("list", ListView, { sequence: 10 });
-views.add("list", Other);                   // throws
-views.add("list", Other, { force: true });  // ok
+views.add("list", listView, { sequence: 10 });
+views.add("list", other);                   // throws
+views.add("list", other, { force: true });  // ok
 
 views.get("list");        // throws if missing
 views.get("map", null);   // or a default
@@ -2204,7 +2204,7 @@ export const services = new Resource({
     validation: t.constructor(Plugin),
 });
 
-services.add(ReportingPlugin);  // starts with the tab
+services.add(ReportingPlugin);  // started with the web client
 
 // one of your own, read back with tiles.items()
 const tiles = new Resource({ name: "tiles" });
@@ -2245,6 +2245,7 @@ tiles.<mark>use</mark>({ Component: SalesTile });  // until destroy</code></pre>
       <h2>Window actions</h2>
       <ul class="notes">
         <li>Far and away the most common one: nearly every menu in Odoo opens an <code>act_window</code>.</li>
+        <li>The xml below is not read at runtime: installing the addon writes a row in <code>ir_actions</code>. The UI lives in the database, which most frameworks do not do.</li>
         <li>It names a model and a list of view types. The web client loads those views and renders the first, with a switcher for the rest.</li>
       </ul>
     </header>
@@ -2270,7 +2271,7 @@ tiles.<mark>use</mark>({ Component: SalesTile });  // until destroy</code></pre>
       </section>
     </div>
     <footer class="slide-foot">
-      <p>Nothing here is javascript: it is a record. Your addon writes one when a menu should open a screen it did not have to build.</p>
+      <p>Nothing here is javascript: it is a record, and a user with the rights can edit it. Your addon writes one when a menu should open a screen it did not have to build.</p>
     </footer>
   </article>
 
@@ -2341,19 +2342,23 @@ def stats(self, period):
       </section>
       <section>
         <h3 class="label">The orm plugin</h3>
-<pre><code class="language-javascript">import { Component, usePlugin } from "@odoo/owl";
+<pre><code class="language-javascript">import { Component, onWillStart, signal, usePlugin } from "@odoo/owl";
 import { ORM } from "@web/core/orm_plugin";
 
 class Dashboard extends Component {
+    orm = <mark>usePlugin(ORM)</mark>;
+    partners = signal([]);
+
     setup() {
-        this.orm = <mark>usePlugin(ORM)</mark>;
+        onWillStart(() =&gt; this.load());
     }
 
     async load() {
         const domain = [["is_company", "=", true]];
-        this.partners = await this.orm.<mark>searchRead</mark>(
+        const partners = await this.orm.<mark>searchRead</mark>(
             "res.partner", domain, ["name", "email"],
         );
+        this.partners.set(partners);
     }
 }</code></pre>
         <p class="caption"><code>orm.call</code> reaches any other model method.</p>
@@ -2664,8 +2669,8 @@ registry.category("views").add("kanban", kanbanView);</code></pre>
     </header>
     <div class="slide-body">
       <figure class="figure formtree">
-        <svg viewBox="0 0 1000 320" role="img"
-             aria-label="WithSearch holds the FormController, which owns a RelationalModel and mounts a Layout. The Layout holds the ControlPanel and the FormRenderer. The FormRenderer mounts one component per field: CharField, Many2OneField, X2ManyField. The X2ManyField holds a ListRenderer of its own.">
+        <svg viewBox="0 0 1000 368" role="img"
+             aria-label="View, the component an action mounts, holds WithSearch, which holds the FormController. The controller owns a RelationalModel and mounts a Layout. The Layout holds the ControlPanel and the FormRenderer. The FormRenderer mounts one component per field: CharField, Many2OneField, X2ManyField. The X2ManyField holds a ListRenderer of its own.">
           <defs>
             <marker id="vw-ar-2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
               <path d="M0 0 L10 5 L0 10 Z"/>
@@ -2673,47 +2678,54 @@ registry.category("views").add("kanban", kanbanView);</code></pre>
           </defs>
 
           <rect class="bx" x="0" y="0" width="300" height="40" rx="6"/>
-          <text class="t" x="150" y="26">WithSearch</text>
+          <text class="t" x="150" y="26">View</text>
+          <text class="s l" x="320" y="26">what the action mounts</text>
 
           <path class="ar" d="M18 40 V64 H32"/>
 
-          <rect class="bx js" x="36" y="44" width="300" height="40" rx="6"/>
-          <text class="t" x="186" y="70">FormController</text>
-
-          <path class="ar" marker-end="url(#vw-ar-2)" d="M340 64 H696"/>
-          <text class="s" x="518" y="54">owns</text>
-
-          <rect class="bx js" x="700" y="44" width="280" height="40" rx="6"/>
-          <text class="t" x="840" y="70">RelationalModel</text>
+          <rect class="bx" x="36" y="44" width="300" height="40" rx="6"/>
+          <text class="t" x="186" y="70">WithSearch</text>
+          <text class="s l" x="356" y="70">the search bar and its domain</text>
 
           <path class="ar" d="M54 84 V108 H68"/>
 
-          <rect class="bx" x="72" y="88" width="300" height="40" rx="6"/>
-          <text class="t" x="222" y="114">Layout</text>
+          <rect class="bx js" x="72" y="88" width="300" height="40" rx="6"/>
+          <text class="t" x="222" y="114">FormController</text>
 
-          <path class="ar" d="M90 128 V196 M90 152 H108 M90 196 H108"/>
+          <path class="ar" marker-end="url(#vw-ar-2)" d="M376 108 H696"/>
+          <text class="s" x="536" y="98">owns</text>
+
+          <rect class="bx js" x="700" y="88" width="280" height="40" rx="6"/>
+          <text class="t" x="840" y="114">RelationalModel</text>
+
+          <path class="ar" d="M90 128 V152 H104"/>
 
           <rect class="bx" x="108" y="132" width="300" height="40" rx="6"/>
-          <text class="t" x="258" y="158">ControlPanel</text>
+          <text class="t" x="258" y="158">Layout</text>
 
-          <rect class="bx js" x="108" y="176" width="300" height="40" rx="6"/>
-          <text class="t" x="258" y="202">FormRenderer</text>
+          <path class="ar" d="M126 172 V240 M126 196 H144 M126 240 H144"/>
 
-          <path class="ar" d="M126 216 V226 H686 M234 226 V232 M450 226 V232 M686 226 V232"/>
+          <rect class="bx" x="144" y="176" width="300" height="40" rx="6"/>
+          <text class="t" x="294" y="202">ControlPanel</text>
 
-          <rect class="bx" x="144" y="232" width="180" height="40" rx="6"/>
-          <text class="t" x="234" y="258">CharField</text>
+          <rect class="bx js" x="144" y="220" width="300" height="40" rx="6"/>
+          <text class="t" x="294" y="246">FormRenderer</text>
 
-          <rect class="bx" x="340" y="232" width="220" height="40" rx="6"/>
-          <text class="t" x="450" y="258">Many2OneField</text>
+          <path class="ar" d="M162 260 V270 H722 M270 270 V276 M486 270 V276 M722 270 V276"/>
 
-          <rect class="bx" x="576" y="232" width="220" height="40" rx="6"/>
-          <text class="t" x="686" y="258">X2ManyField</text>
+          <rect class="bx" x="180" y="276" width="180" height="40" rx="6"/>
+          <text class="t" x="270" y="302">CharField</text>
 
-          <path class="ar" d="M594 272 V296 H612"/>
+          <rect class="bx" x="376" y="276" width="220" height="40" rx="6"/>
+          <text class="t" x="486" y="302">Many2OneField</text>
 
-          <rect class="bx js" x="612" y="276" width="220" height="40" rx="6"/>
-          <text class="t" x="722" y="302">ListRenderer</text>
+          <rect class="bx" x="612" y="276" width="220" height="40" rx="6"/>
+          <text class="t" x="722" y="302">X2ManyField</text>
+
+          <path class="ar" d="M630 316 V340 H648"/>
+
+          <rect class="bx js" x="648" y="320" width="220" height="40" rx="6"/>
+          <text class="t" x="758" y="346">ListRenderer</text>
         </svg>
       </figure>
     </div>
@@ -2954,10 +2966,10 @@ registry.category("view_widgets").add("web_ribbon", ribbonWidget);</code></pre>
       <p class="eyebrow">Fields</p>
       <h2>Which component, for which field?</h2>
     </header>
-    <div class="slide-body two-col even">
+    <div class="slide-body two-col even snug">
       <section>
         <h3 class="label">1. The widget attribute</h3>
-<pre><code class="language-markup">&lt;field name="category_ids" widget="tags"/&gt;</code></pre>
+<pre><code class="language-markup">&lt;field name="category_ids" widget="many2many_tags"/&gt;</code></pre>
         <p>If it is set, that name is looked up in the <code>"fields"</code> registry.</p>
       </section>
       <section>
@@ -3037,18 +3049,16 @@ registry.category("fields").add("hash", hashField);</code></pre>
       </section>
       <section>
         <h3 class="label file">hash_field.xml</h3>
-<pre><code class="language-markup">&lt;templates xml:space="preserve"&gt;
-    &lt;t t-name="web.HashField"&gt;
-        &lt;div t-if="!props.record.data[props.name]"&gt;
-            &lt;button
-                class="btn btn-secondary"
-                t-on-click="this.generate"&gt;
-                Generate
-            &lt;/button&gt;
-        &lt;/div&gt;
-        &lt;span t-esc="props.record.data[props.name]"/&gt;
-    &lt;/t&gt;
-&lt;/templates&gt;</code></pre>
+<pre><code class="language-markup">&lt;t t-name="web.HashField"&gt;
+    &lt;div t-if="!<mark>this.props</mark>.record.data[<mark>this.props</mark>.name]"&gt;
+        &lt;button
+            class="btn btn-secondary"
+            t-on-click="this.generate"&gt;
+            Generate
+        &lt;/button&gt;
+    &lt;/div&gt;
+    &lt;span t-out="<mark>this.props</mark>.record.data[this.props.name]"/&gt;
+&lt;/t&gt;</code></pre>
       </section>
     </div>
     <footer class="slide-foot">
@@ -3115,22 +3125,39 @@ registry.category("fields").add("hash", hashField);</code></pre>
       <h2>extractProps</h2>
       <p class="lead">Turns arch data into component props. It takes two arguments.</p>
     </header>
-    <div class="slide-body two-col even">
+    <div class="slide-body two-col even snug">
       <section>
         <h3 class="label">fieldInfo</h3>
         <ul>
-          <li><code>attrs</code></li>
-          <li><code>options</code></li>
+          <li><code>attrs</code>, <code>options</code></li>
+          <li><code>viewType</code></li>
           <li>...</li>
         </ul>
+        <p class="caption">What the arch said, and which view is asking.</p>
       </section>
       <section>
         <h3 class="label">dynamicInfo</h3>
         <ul>
-          <li><code>readonly</code></li>
-          <li><code>required</code></li>
-          <li><code>context</code></li>
-          <li><code>domain()</code></li>
+          <li><code>readonly</code>, <code>required</code></li>
+          <li><code>context</code>, <code>domain()</code></li>
+        </ul>
+        <p class="caption">What is true of this instance, right now.</p>
+      </section>
+    </div>
+    <div class="slide-body two-col even snug" style="margin-top: 1.6cqw">
+      <section>
+        <h3 class="label file">priority_field.js — from addons/web</h3>
+<pre><code class="language-javascript">extractProps(<mark>{ viewType }</mark>, dynamicInfo) {
+    return {
+        withCommand: <mark>viewType === "form"</mark>,
+        readonly: dynamicInfo.readonly,
+    };
+},</code></pre>
+      </section>
+      <section>
+        <ul class="rows wide-key">
+          <li><span class="key">The component</span><span>Takes a <code>withCommand</code> prop. It never asks what view it is in.</span></li>
+          <li><span class="key">extractProps</span><span>Reads <code>viewType</code> and decides. Defaulting or forcing a prop per view type is what this argument is for.</span></li>
         </ul>
       </section>
     </div>
@@ -9694,6 +9721,8 @@ command provider, and state persisted to (and migrated in) local storage.
         <h2>Masterclass<br>Odoo JS</h2>
         <p class="lead">RD Framework JS - Géry Debongnie - Jorge Pinna Puissant</p>
       </div>
+
+      <p class="welcome-url">https://ged-odoo.github.io/masterclass-js-2026/</p>
     </div>
   </div>
 </section>

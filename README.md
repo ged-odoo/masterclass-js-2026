@@ -13,7 +13,7 @@ PDF.
 
 ## Before you arrive
 
-You need a running Odoo on the `master` branch - an
+You need a running Odoo on `20.0` or `master` - an
 [odoo.sh](https://www.odoo.sh) project does just as well as a local one, and
 is worth starting the day before, since the first build takes a while.
 
