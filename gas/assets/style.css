@@ -2695,6 +2695,10 @@ html.embedded .sidebar { display: none; }
 /* the two ways to customize, side by side */
 #deck-customizing-views .rows.strategies { --box-cols: 2; }
 
+/* the four extension points, sorted into the two kinds they are: one column
+   each, stacked, so the grouping is the first thing read */
+#deck-customizing-ui .two-col.kinds .rows.boxes { --box-cols: 1; }
+
 /* ---------- Advanced JS framework ---------- */
 
 /* the generic components: the name, what it does, the module it lives in */

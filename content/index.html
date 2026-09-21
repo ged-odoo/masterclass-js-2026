@@ -2398,7 +2398,7 @@ class Dashboard extends Component {
     </header>
     <div class="slide-body">
       <ul class="rows boxes strategies">
-        <li><h3>Monkey-patching</h3><p>Modify in place. Every instance of that view or field changes, everywhere in the database, for every user.</p></li>
+        <li><h3>Monkey-patching</h3><p>Modify in place. Every instance of that view or field changes, everywhere in the web client, for every user.</p></li>
         <li><h3>Subclassing</h3><p>Create a variation, and use it on the screens that asked for it: a <code>js_class</code> on the view, a <code>widget</code> on the field.</p></li>
       </ul>
     </div>
@@ -2439,9 +2439,11 @@ registry.category("fields").add("hidden-hash", hiddenHashField);</code></pre>
         <h3 class="label file">hidden_hash_field.xml</h3>
 <pre><code class="language-markup">&lt;t t-name="web.HiddenHashField" t-inherit="web.HashField"&gt;
     &lt;xpath expr="//span" position="replace"&gt;
-        &lt;span t-if="props.isHidden"
-              t-esc="'*'.repeat(props.record.data[props.name].length)"/&gt;
-        &lt;span t-else="" t-esc="props.record.data[props.name]"/&gt;
+        &lt;t t-set="hash"
+           t-value="<mark>this.props</mark>.record.data[<mark>this.props</mark>.name]"/&gt;
+        &lt;span t-if="<mark>this.props</mark>.isHidden"
+              t-out="'*'.repeat(hash.length)"/&gt;
+        &lt;span t-else="" t-out="hash"/&gt;
     &lt;/xpath&gt;
 &lt;/t&gt;</code></pre>
       </section>
@@ -3147,9 +3149,9 @@ registry.category("fields").add("hash", hashField);</code></pre>
     <div class="slide-body two-col even snug" style="margin-top: 1.6cqw">
       <section>
         <h3 class="label file">priority_field.js — from addons/web</h3>
-<pre><code class="language-javascript">extractProps(<mark>{ viewType }</mark>, dynamicInfo) {
+<pre><code class="language-javascript">extractProps(<mark>fieldInfo</mark>, dynamicInfo) {
     return {
-        withCommand: <mark>viewType === "form"</mark>,
+        withCommand: <mark>fieldInfo.viewType === "form"</mark>,
         readonly: dynamicInfo.readonly,
     };
 },</code></pre>
@@ -3157,7 +3159,7 @@ registry.category("fields").add("hash", hashField);</code></pre>
       <section>
         <ul class="rows wide-key">
           <li><span class="key">The component</span><span>Takes a <code>withCommand</code> prop. It never asks what view it is in.</span></li>
-          <li><span class="key">extractProps</span><span>Reads <code>viewType</code> and decides. Defaulting or forcing a prop per view type is what this argument is for.</span></li>
+          <li><span class="key">extractProps</span><span>Reads <code>fieldInfo.viewType</code> and decides. Defaulting or forcing a prop per view type is what it is for.</span></li>
         </ul>
       </section>
     </div>
@@ -3204,18 +3206,28 @@ registry.category("fields").add("form.hash", formHashField);</code></pre>
     <header class="slide-head">
       <p class="eyebrow">Extension points</p>
       <h2>Extending instead of rewriting</h2>
-      <p class="lead">There is no <code>_inherit</code> in javascript. Four tools instead.</p>
+      <p class="lead">There is no <code>_inherit</code> in javascript. Four tools instead, of two kinds.</p>
     </header>
-    <div class="slide-body">
-      <ul class="rows boxes">
-        <li><h3>Registries</h3><p>Add or replace a field widget, a view, a service, a systray item.</p></li>
-        <li><h3><code>patch()</code></h3><p>Change a method on an existing class or object.</p></li>
-        <li><h3>xpath</h3><p>Extend a template: <code>t-inherit</code> and <code>t-inherit-mode="extension"</code>.</p></li>
-        <li><h3><code>extends</code></h3><p>Subclass a component, then register the subclass.</p></li>
-      </ul>
+    <div class="slide-body two-col even snug kinds">
+      <section>
+        <h3 class="label">Add something of your own</h3>
+        <ul class="rows boxes">
+          <li><h3>Registries</h3><p>Add or replace a field widget, a view, a service, a systray item.</p></li>
+          <li><h3><code>extends</code></h3><p>Subclass a component, then register the subclass.</p></li>
+        </ul>
+        <p class="caption">The standard code is untouched, and what you added is used where it was asked for.</p>
+      </section>
+      <section>
+        <h3 class="label">Change what is already there</h3>
+        <ul class="rows boxes">
+          <li><h3><code>patch()</code></h3><p>Change a method on an existing class or object.</p></li>
+          <li><h3><code>t-inherit-mode="extension"</code></h3><p>Change an existing template in place, with an <code>xpath</code>.</p></li>
+        </ul>
+        <p class="caption">In place, everywhere, for everyone — including the screens you have never seen.</p>
+      </section>
     </div>
     <footer class="slide-foot">
-      <p>Registries and <code>extends</code> first: they leave the standard code alone.</p>
+      <p>The left column first. Reach right only when the standard code left you no hook.</p>
     </footer>
   </article>
 
@@ -3287,7 +3299,7 @@ registry.category(<mark>"user_menuitems"</mark>).add("clicker", () =&gt; ({
       </section>
       <section>
         <ul class="rows wide-key">
-          <li><span class="key">Systray</span><span>A component. The sequence decides where it lands.</span></li>
+          <li><span class="key">Systray</span><span>An object with a <code>Component</code> key, not the component itself. The sequence decides where it lands.</span></li>
           <li><span class="key">Commands</span><span><code>useCommand</code> registers while the component is mounted, and cleans up on its own.</span></li>
           <li><span class="key">Hotkeys</span><span>The <code>hotkey</code> service, for a shortcut without a menu.</span></li>
         </ul>
@@ -3488,19 +3500,22 @@ this.counter = useState(this.env.myCounter);</code></pre>
       </section>
       <section>
         <h3 class="label">What you write</h3>
-<pre><code class="language-javascript">// shared state, and the logic around it
-this.clicker = <mark>usePlugin(ClickerPlugin)</mark>;
+<pre><code class="language-javascript">// handing state down a subtree: useSubEnv's heir
+<mark>providePlugins([ClickerPlugin])</mark>;
+
+// reading it, anywhere below
+clicker = <mark>usePlugin(ClickerPlugin)</mark>;
 
 // something the app was mounted with
 const debug = <mark>useConfig("debug")</mark>;</code></pre>
         <ul class="rows wide-key">
-          <li><span class="key">Why</span><span>A plugin is typed, reachable by class, and cannot be reached by accident. <code>env</code> was one bag for everything.</span></li>
-          <li><span class="key">When it goes</span><span>With the compatibility layer. Code that leans on <code>env</code> goes with it.</span></li>
+          <li><span class="key">Provide</span><span><code>providePlugins</code> is what <code>useSubEnv</code> became: it makes a plugin available to one subtree. <code>services.add</code> does the same for the whole tab.</span></li>
+          <li><span class="key">Read</span><span><code>usePlugin</code> is the other half — typed, asked for by class, and impossible to reach by accident. <code>env</code> was one bag for everything.</span></li>
         </ul>
       </section>
     </div>
     <footer class="slide-foot">
-      <p>Recognize it, do not write it.</p>
+      <p>Recognize it, do not write it. <code>env</code> goes with the compatibility layer, and the code leaning on it goes too.</p>
     </footer>
   </article>
 </div>
@@ -5010,7 +5025,7 @@ import { Component, xml } from "@odoo/owl";
 class AwesomeDashboardLoader extends Component {
     static components = { LazyComponent };
     static template = xml`
-    &lt;LazyComponent bundle="'awesome_dashboard.dashboard'" Component="'AwesomeDashboard'" props="props"/&gt;
+    &lt;LazyComponent bundle="'awesome_dashboard.dashboard'" Component="'AwesomeDashboard'" props="this.props"/&gt;
     `;
 }
 
