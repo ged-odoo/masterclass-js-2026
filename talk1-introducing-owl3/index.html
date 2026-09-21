@@ -1337,67 +1337,50 @@ export class TodoList extends Component {
     </div>
   </article>
 
-  <article class="slide" data-id="a1f0035b" data-act="vision">
+  <article class="slide with-owl" data-id="a1f0035b" data-act="vision">
     <header class="slide-head">
       <p class="eyebrow">Closing the loop</p>
       <h2>What Owl 3 gives you</h2>
-      <p class="lead">Two answers, and between them the four soft limits from the start of the talk.</p>
+      <p class="lead">Three sets of tools against complexity — between them, the four soft limits from the start of the talk.</p>
     </header>
-    <div class="slide-body two-col even">
-      <section>
-        <h3 class="label file"><code>signal</code> · <code>computed</code> · <code>useEffect</code></h3>
-        <ul class="rows wide-key">
-          <li><span class="key">Easier to get right</span><span>Reactivity belongs to the value, not to the container it arrived in, so it survives every boundary.</span></li>
-          <li><span class="key">Derived state, declared</span><span>It caches itself, it is lazy, and it composes across addons.</span></li>
-          <li><span class="key">Reacting to change</span><span>An effect is a thing you write, not a lifecycle hook you hang code on.</span></li>
-        </ul>
-      </section>
-      <section>
-        <h3 class="label file"><code>Plugin</code> · <code>usePlugin</code> · <code>useProps</code></h3>
-        <ul class="rows wide-key">
-          <li><span class="key">Shared without a bag</span><span>Asked for by class, not by a string nobody can follow back to its source.</span></li>
-          <li><span class="key">Typed</span><span>The class is the type, and props say their own shape. Nothing left to generate.</span></li>
-          <li><span class="key">Somewhere to put it</span><span>Global, or owned by the screen that opened it. The framework finally has an opinion.</span></li>
-        </ul>
-      </section>
+    <div class="owl-corner owl-top" aria-hidden="true">
+      <svg viewBox="0 0 220 264">
+        <g transform="translate(110 236)">
+          <path class="owl-foot" d="M-30 0 v16 M-30 16 h-15 M-30 16 h15 M30 0 v16 M30 16 h-15 M30 16 h15"/>
+          <path fill="#4f3349" d="M-64 -168 L-80 -212 L-40 -184 Z"/>
+          <path fill="#4f3349" d="M64 -168 L80 -212 L40 -184 Z"/>
+          <path fill="#8c6382" d="M-82 -62 C-82 -152 -46 -196 0 -196 C46 -196 82 -152 82 -62 C82 -12 46 8 0 8 C-46 8 -82 -12 -82 -62 Z"/>
+          <ellipse fill="#f6eff4" cx="0" cy="-42" rx="40" ry="46"/>
+          <path fill="#4f3349" opacity="0.22" d="M-78 -96 C-92 -56 -84 -20 -62 -4 C-70 -40 -72 -70 -66 -100 Z"/>
+          <path fill="#4f3349" opacity="0.22" d="M78 -96 C92 -56 84 -20 62 -4 C70 -40 72 -70 66 -100 Z"/>
+          <circle fill="#fff" cx="-30" cy="-126" r="27"/>
+          <circle fill="#2a1c26" cx="-30" cy="-126" r="12"/>
+          <circle fill="#fff" cx="-26" cy="-131" r="4"/>
+          <circle fill="#fff" cx="30" cy="-126" r="27"/>
+          <circle fill="#2a1c26" cx="30" cy="-126" r="12"/>
+          <circle fill="#fff" cx="34" cy="-131" r="4"/>
+          <path fill="#e8a33d" d="M-10 -104 L10 -104 L0 -84 Z"/>
+        </g>
+      </svg>
     </div>
-    <footer class="slide-foot">
-      <p>That is soft limits 1, 2 and 3 answered. The fourth is an opinion, and opinions are the slowest thing to ship.</p>
-    </footer>
-  </article>
-
-  <article class="slide" data-id="a1f00036" data-act="vision">
-    <header class="slide-head">
-      <p class="eyebrow">Vision</p>
-      <h2>The graph gets smarter</h2>
-      <p class="lead">If rendering is solved and state management is the frontier, the roadmap is not a faster renderer.</p>
-    </header>
-    <div class="slide-body two-col even">
-      <section>
-        <ul class="rows wide-key">
-          <li><span class="key">More graph</span><span><code>asyncComputed</code>, <code>Suspense</code>, cancellation that follows the component that asked.</span></li>
-          <li><span class="key">More guidance</span><span>Plugins gave the framework an opinion about where logic lives. That is soft limit 4 being answered slowly.</span></li>
-          <li><span class="key">More packages</span><span>Owl stops being one library and becomes a small family.</span></li>
-        </ul>
-      </section>
-      <section>
-        <h3 class="label file">doc/.vitepress/config.mjs, today</h3>
-<pre><code class="language-javascript">// Re-enable this group at the top of each per-route
-// sidebar <mark>when a second package lands</mark>
-// const packageSwitcher = {
-//   text: "Packages",
-//   items: [
-//     { text: "Owl", link: "/v3/owl/" },
-//     { text: "Router", link: "/v3/owl-router/" },
-//     { text: "ORM", link: "/v3/owl-orm/" },
-//   ],
-// };</code></pre>
-        <p class="caption">Commented out, and waiting. The shape is already decided.</p>
-      </section>
+    <div class="slide-body">
+      <ul class="rows boxes toolkit">
+        <li>
+          <h3><code>signal</code> · <code>computed</code> · <code>useEffect</code></h3>
+          <p>Reactivity belongs to the value, not to the container it arrived in, so it survives every boundary. Derived state declares itself: lazy, cached, composing across addons. An effect is a thing you write, not a lifecycle hook you hang code on.</p>
+          <p class="meta">Still coming: <code>asyncComputed</code>, <code>Suspense</code>, cancellation that follows the component that asked for it.</p>
+        </li>
+        <li>
+          <h3><code>Plugin</code> · <code>usePlugin</code></h3>
+          <p>Shared logic asked for by class, not by a string nobody can follow back to its source. Global, or owned by the screen that opened it — the framework finally has an opinion about where logic lives.</p>
+          <p class="meta">Still coming: Owl stops being one library and becomes a small family — a router, an ORM.</p>
+        </li>
+        <li>
+          <h3><code>useProps</code> · <code>types</code></h3>
+          <p>Props say their own shape, and a plugin's class is its own type. That is years of hand-written and generated <code>.d.ts</code> files no longer worth writing.</p>
+        </li>
+      </ul>
     </div>
-    <footer class="slide-foot">
-      <p>A framework with an opinion, and a graph you can reason about. That is the direction.</p>
-    </footer>
   </article>
 
   <article class="slide" data-id="a1f00037" data-act="vision">

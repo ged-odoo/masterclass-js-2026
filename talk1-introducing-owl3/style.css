@@ -40,6 +40,15 @@
   transform: translateY(-50%);
 }
 
+/* the same owl on the closing slide, perched in the corner over the boxes
+   instead of sitting beside the question */
+#deck-talk .owl-corner.owl-top {
+  right: 3cqw;
+  top: 2cqw;
+  width: 11cqw;
+  transform: none;
+}
+
 #deck-talk .owl-corner svg {
   display: block;
   width: 100%;
@@ -326,4 +335,12 @@
    deck name either. For the one-line claims that want the slide to themselves */
 .clean .slide.statement.bare .slide-head { border-bottom: 0; }
 
+/* the closing slide: the three toolkits side by side, read at a glance.
+   align-content: start because the boxes hold different amounts - centred,
+   the three headings land at three different heights */
+#deck-talk .rows.toolkit { --box-cols: 3; }
+#deck-talk .rows.toolkit li { align-content: start; }
 
+/* one name list runs to two lines, the other two do not. Reserving the two
+   lines everywhere starts all three bodies on the same line */
+#deck-talk .rows.toolkit h3 { min-height: 2lh; }
