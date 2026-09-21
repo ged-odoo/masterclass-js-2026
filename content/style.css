@@ -36,6 +36,43 @@
 
 #view-odoosh li { margin-bottom: 8px; }
 
+/* the code attendees type on odoo.sh to get their Odoo 20 project - the one
+   thing on this page they have to carry with them, so it is set large enough
+   to read off a projected screen and copy by hand. */
+.odoosh-code {
+  margin: 24px 0 28px;
+  padding: 18px 22px;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 8px;
+  background: var(--panel);
+}
+
+.odoosh-code .key {
+  margin: 0 0 6px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.odoosh-code .code {
+  margin: 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 26px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.odoosh-code .hint {
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 14.5px;
+}
+
+.odoosh-code a { color: var(--accent); }
+
 /* the lifecycle's two nested pairs: setup/onWillDestroy on the outside,
    onMounted/onWillUnmount within it. Colour is the whole explanation, so it
    goes on those four boxes and nothing else. */

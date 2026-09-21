@@ -14,8 +14,10 @@ PDF.
 ## Before you arrive
 
 You need a running Odoo on `20.0` or `master` - an
-[odoo.sh](https://www.odoo.sh) project does just as well as a local one, and
-is worth starting the day before, since the first build takes a while.
+[odoo.sh](https://www.odoo.sh) project does just as well as a local one.
+
+On odoo.sh, use the code **`SMARTCLASS26-OXP`** - that is what gets you the
+Odoo 20 project this masterclass runs on.
 
 Then clone this repository and start Odoo with it in the addons path:
 
