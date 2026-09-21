@@ -27,7 +27,7 @@ class Animal(models.Model):
     race_id = fields.Many2one("awesome_shelter.animal_race", "Race")
     notes = fields.Html("Notes")
     dropper_id = fields.Many2one("res.partner", "Dropper")
-    drop_date = fields.Date("Drop date", default=fields.Date.today(), required=True)
+    drop_date = fields.Date("Drop date", default=fields.Date.context_today, required=True)
     owner_id = fields.Many2one("res.partner", "Owner", tracking=True)
     birth_date = fields.Date("Birth date")
 

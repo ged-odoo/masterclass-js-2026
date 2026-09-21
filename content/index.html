@@ -2497,21 +2497,6 @@ registry.category("views").add("crm_form", {
     </footer>
   </article>
 
-  <article class="slide" data-id="660d9071">
-    <header class="slide-head">
-      <p class="eyebrow">Topic 3 · Views and Fields</p>
-      <h2>Goals</h2>
-    </header>
-    <div class="slide-body">
-      <ul class="rows boxes tinted goals">
-        <li><h3>Views</h3></li>
-        <li><h3>RelationalModel</h3></li>
-        <li><h3>Fields</h3></li>
-        <li><h3>Widgets</h3></li>
-        <li><h3>Customizing</h3></li>
-      </ul>
-    </div>
-  </article>
 
   <article class="slide" data-id="ad84c814">
     <header class="slide-head">
@@ -3418,7 +3403,7 @@ counter = <mark>usePlugin(CounterPlugin)</mark>;</code></pre>
       </section>
     </div>
     <footer class="slide-foot">
-      <p>Step 9 of the clicker game is this refactor: the game rules leave the components for good.</p>
+      <p>Step 4 of the clicker game is this refactor: the game rules leave the components for good.</p>
     </footer>
   </article>
 
@@ -4787,7 +4772,7 @@ wherever it needs a value, and gets the latest data automatically - no
 subscribing step needed. So the reload only has to set it again.
 
 1. Update `ReportingPlugin` to reload data every 10 minutes (to test it,
-   use 10s instead!)
+   use 5s instead!)
 2. Drop `loadStatistics()`: the plugin loads in its own `setup()`, on a timer,
    and sets `stats` each time. Clear that timer in an `onWillDestroy`.
 3. `stats` starts at `null`, so the template has its own answer to "has it
@@ -5551,13 +5536,12 @@ import { dashboardItems } from "./dashboard_items";
 import { DashboardItem } from "./dashboard_item";
 import { Dialog } from "@web/core/dialog/dialog";
 import { CheckBox } from "@web/core/checkbox/checkbox";
-import { browser } from "@web/core/browser/browser";
 
 class AwesomeDashboard extends Component {
     static template = "awesome_dashboard.AwesomeDashboard";
     static components = { Layout, DashboardItem };
 
-    disabledItems = signal(browser.localStorage.getItem("disabledDashboardItems")?.split(",") || []);
+    disabledItems = signal(window.localStorage.getItem("disabledDashboardItems")?.split(",") || []);
     action = usePlugin(ActionPlugin);
     reporting = usePlugin(ReportingPlugin);
     items = dashboardItems.items;
@@ -5573,7 +5557,7 @@ class AwesomeDashboard extends Component {
 
     updateConfiguration(newDisabledItems) {
         this.disabledItems.set(newDisabledItems);
-        browser.localStorage.setItem("disabledDashboardItems", newDisabledItems);
+        window.localStorage.setItem("disabledDashboardItems", newDisabledItems);
     }
 
     openCustomerView() { ... }
@@ -7475,8 +7459,8 @@ client, that displays a component.
 2. Register that client action in the action registry under the name
    `awesome_clicker.client_action`
 3. Add a button on the systray item with the text "Open". Clicking on it should
-   open the client action `awesome_clicker.client_action` (use the action
-   service to do that).
+   open the client action `awesome_clicker.client_action` (use the
+   `ActionPlugin` to do that).
 4. To avoid disrupting employees workflow, we prefer the client action to open
    within a popover rather than in fullscreen mode. Modify the `doAction` call
    to open it in a popover.
@@ -7607,13 +7591,11 @@ and a new client action, its own "hello world" component:
 <div class="after">
 <h4>After</h4>
 
-<pre><code class="language-javascript">import { Component, useProps } from "@odoo/owl";
+<pre><code class="language-javascript">import { Component } from "@odoo/owl";
 import { registry } from "@web/core/registry";
-import { standardActionServiceProps } from "@web/webclient/actions/action_plugin";
 
 class ClickerClientAction extends Component {
     static template = "awesome_clicker.ClickerClientAction";
-    props = useProps({ ...standardActionServiceProps });
 }
 
 registry.category("actions").add("awesome_clicker.client_action", ClickerClientAction);</code></pre>
@@ -7650,13 +7632,7 @@ registry.category("actions").add("awesome_clicker.client_action", ClickerClientA
 A component opened in a popover (`target: "new"`) is rendered inside the
 framework's own `Dialog`, so it inherits `this.env.dialogData` from it - no
 prop to thread through, `close()` is just there. The `modal-footer` class is
-only borrowed for the same look as the dialog's real footer, not the real
-thing (that one is controlled by the action itself, not by us).
-
-A client action receives a standard set of props from the framework
-(`action`, `actionId`, `resId`...) - `standardActionServiceProps`, exported by
-`@web/webclient/actions/action_plugin`, is the schema for exactly that,
-spread into `useProps`.
+only borrowed for the same look as the dialog's real footer.
 
 </details>
 
@@ -7671,8 +7647,8 @@ application.
 
 1. Create a `clicker_plugin.js` file with the corresponding plugin: a class
    extending `Plugin`, registered on the `services` resource from
-   `@web/core/services` (despite the name, that's Owl's own list of app-wide
-   plugins the framework starts automatically).
+   `@web/core/services` (that's Owl's own list of app-wide plugins the
+   framework starts automatically).
 2. This plugin should hold a reactive value (the number of clicks) and a few
    methods to update it. Move the systray's click-counting listener into the
    plugin's own `setup()` too - `useListener` works there exactly like in a
@@ -7737,9 +7713,8 @@ services.add(ClickerPlugin);</code></pre>
 
 Local reactive state is a `signal(0)` class field, same as the systray's own
 `counter` used to be - read by calling it `this.clicks()` and written with
-`.set(...)`, never mutated directly. A plugin's fields work exactly like a
-component's on that front. `useListener` works inside a plugin's `setup()`
-just like inside a component's, with the same automatic cleanup.
+`.set(...)`, never mutated directly. `useListener` works inside a plugin's
+`setup()` just like inside a component's, with the same automatic cleanup.
 
 **static/src/clicker_systray_item/clicker_systray_item.js**, the state moves
 out to the plugin:
@@ -7779,10 +7754,7 @@ export class ClickerSystray extends Component {
     static template = "awesome_clicker.ClickerSystray";
 
     action = usePlugin(ActionPlugin);
-
-    setup() {
-        this.clicker = usePlugin(ClickerPlugin);
-    }</code></pre>
+    clicker = usePlugin(ClickerPlugin);</code></pre>
 
 </div>
 </div>
@@ -7829,10 +7801,9 @@ local state and method - the `openClientAction` button doesn't change:
 </div>
 </div>
 
-The `+9` button is gone - every click already counts through the plugin's
-own listener, so a dedicated button in the systray only duplicated it.
-Calling `this.clicker.clicks()` during render tracks it, exactly like the
-systray's own `counter` used to.
+The `+9` button moves to the client action (see below). Calling
+`this.clicker.clicks()` during render tracks it, exactly like the systray's
+own `counter` used to.
 
 **static/src/client_action/client_action.js**, the same `usePlugin` in `setup()`:
 
@@ -7840,13 +7811,11 @@ systray's own `counter` used to.
 <div class="before">
 <h4>Before</h4>
 
-<pre><code class="language-javascript">import { Component, useProps } from "@odoo/owl";
+<pre><code class="language-javascript">import { Component } from "@odoo/owl";
 import { registry } from "@web/core/registry";
-import { standardActionServiceProps } from "@web/webclient/actions/action_plugin";
 
 class ClickerClientAction extends Component {
     static template = "awesome_clicker.ClickerClientAction";
-    props = useProps({ ...standardActionServiceProps });
 }
 
 registry.category("actions").add("awesome_clicker.client_action", ClickerClientAction);</code></pre>
@@ -7855,18 +7824,14 @@ registry.category("actions").add("awesome_clicker.client_action", ClickerClientA
 <div class="after">
 <h4>After</h4>
 
-<pre><code class="language-javascript">import { Component, useProps, usePlugin } from "@odoo/owl";
+<pre><code class="language-javascript">import { Component, usePlugin } from "@odoo/owl";
 import { registry } from "@web/core/registry";
-import { standardActionServiceProps } from "@web/webclient/actions/action_plugin";
 import { ClickerPlugin } from "../clicker_plugin";
 
 class ClickerClientAction extends Component {
     static template = "awesome_clicker.ClickerClientAction";
-    props = useProps({ ...standardActionServiceProps });
 
-    setup() {
-        this.clicker = usePlugin(ClickerPlugin);
-    }
+    clicker = usePlugin(ClickerPlugin);
 }
 
 registry.category("actions").add("awesome_clicker.client_action", ClickerClientAction);</code></pre>
@@ -7919,17 +7884,18 @@ button to add 10 clicks - the Ok button and its footer don't change:
 
 ## 5. Use a custom hook
 
-Right now, every part of the code that needs the clicker plugin repeats the
-same lookup. Since it is quite common, let us wrap it in a custom hook. It is
-also useful to put more emphasis on the `clicker` part, and less emphasis on
-how it's actually obtained.
+Right now, only two components need the clicker plugin, but several more are
+about to (the value display, the form controller, the command palette...).
+Let us wrap the lookup in a custom hook now, before that fan-out: every future
+consumer then depends on `useClicker`, not on `usePlugin(ClickerPlugin)`
+directly, so the plugin lookup only ever needs to change in one place.
 
 1. Create and export a `useClicker` hook that wraps that lookup in a simple
    function.
 2. Update all current uses of the clicker plugin to the new hook:
 
    ```js
-   this.clicker = useClicker();
+   clicker = useClicker();
    ```
 
 **See also:**
@@ -7960,11 +7926,8 @@ export function useClicker() {
 </div>
 </div>
 
-No `useState` here either, for the same reason as part 4 - `this.clicker.clicks`
-is already a `signal()`, tracked on its own when called during render.
-
 Both the systray item and the client action then just do
-`this.clicker = useClicker();` in `setup()` instead of calling `usePlugin`
+`clicker = useClicker();` as a class field instead of calling `usePlugin`
 directly - everything else (the template expressions, the increment button)
 stays exactly as part 4 left it.
 
@@ -8009,12 +7972,10 @@ import { useClicker } from "../clicker_hook";
 export class ClickerValue extends Component {
     static template = "awesome_clicker.ClickerValue";
 
-    setup() {
-        this.clicker = useClicker();
-    }
+    clicker = useClicker();
 
     get humanizedClicks() {
-        return humanNumber(this.clicker.state.clicks, {
+        return humanNumber(this.clicker.clicks(), {
             decimals: 1,
         });
     }
@@ -8046,7 +8007,7 @@ export class ClickerValue extends Component {
 
 Both the systray item and the client action then use `<ClickerValue/>`
 (registered in `static components`, imported) in place of their own
-`Clicks: <t t-out="this.clicker.state.clicks"/>` line.
+`Clicks: <t t-out="this.clicker.clicks()"/>` line.
 
 </details>
 
@@ -8080,7 +8041,7 @@ interface. Let us display the real number as a tooltip.
 <h4>After</h4>
 
 <pre><code class="language-markup">&lt;t t-name="awesome_clicker.ClickerValue"&gt;
-    &lt;span t-att-data-tooltip="this.clicker.state.clicks" t-out="this.humanizedClicks"/&gt;
+    &lt;span t-att-data-tooltip="this.clicker.clicks()" t-out="this.humanizedClicks"/&gt;
 &lt;/t&gt;</code></pre>
 
 </div>
@@ -8101,7 +8062,7 @@ for 1000 clicks. These robots will generate 10 clicks every 10 seconds.
 3. Modify the client action to display the number of click bots (only if
    `level >= 1`), with a `Buy` button that is enabled if `clicks >= 1000`. The
    `Buy` button should increment the number of clickbots by 1.
-4. Set a 10s interval in the service that will increment the number of clicks by
+4. Set a 10s interval in the plugin that will increment the number of clicks by
    `10*clickBots`.
 5. Make sure the `Buy` button is disabled if the player does not have enough
    clicks.
@@ -8111,80 +8072,69 @@ for 1000 clicks. These robots will generate 10 clicks every 10 seconds.
 <details>
 <summary>Show solution</summary>
 
-**static/src/clicker_service.js**
+**static/src/clicker_plugin.js**
 
 <div class="diff-cols">
 <div class="before">
 <h4>Before</h4>
 
-<pre><code class="language-javascript">import { registry } from "@web/core/registry";
-import { proxy } from "@odoo/owl";
+<pre><code class="language-javascript">import { Plugin, signal, useListener } from "@odoo/owl";
+import { services } from "@web/core/services";
 
-const clickerService = {
-    start(env) {
-        const state = proxy({ clicks: 0 });
+export class ClickerPlugin extends Plugin {
+    clicks = signal(0);
 
-        function increment(inc) {
-            state.clicks += inc;
-        }
+    setup() {
+        useListener(document.body, "click", () => this.increment(1), { capture: true });
+    }
 
-        document.addEventListener("click", () => increment(1), true);
+    increment(inc) {
+        this.clicks.set(this.clicks() + inc);
+    }
+}
 
-        return {
-            state,
-            increment,
-        };
-    },
-};
-
-registry.category("services").add("awesome_clicker.clicker", clickerService);</code></pre>
+services.add(ClickerPlugin);</code></pre>
 
 </div>
 <div class="after">
 <h4>After</h4>
 
-<pre><code class="language-javascript">import { registry } from "@web/core/registry";
-import { proxy } from "@odoo/owl";
+<pre><code class="language-javascript">import { Plugin, signal, useListener, useEffect } from "@odoo/owl";
+import { services } from "@web/core/services";
 
-const clickerService = {
-    start(env) {
-        const state = proxy({
-            clicks: 0,
-            level: 0,
-            clickBots: 0,
+export class ClickerPlugin extends Plugin {
+    clicks = signal(0);
+    level = signal(0);
+    clickBots = signal(0);
+
+    setup() {
+        useListener(document.body, "click", () => this.increment(1), { capture: true });
+        useEffect(() => {
+            const interval = setInterval(() => {
+                this.clicks.set(this.clicks() + this.clickBots() * 10);
+            }, 10000);
+            return () => clearInterval(interval);
         });
+    }
 
-        setInterval(() => {
-            state.clicks += state.clickBots * 10;
-        }, 10000);
-
-        function increment(inc) {
-            state.clicks += inc;
-            if (state.level < 1 && state.clicks >= 1000) {
-                state.level++;
-            }
+    increment(inc) {
+        this.clicks.set(this.clicks() + inc);
+        if (this.level() < 1 && this.clicks() >= 1000) {
+            this.level.set(1);
         }
+    }
 
-        function buyClickBot() {
-            const clickBotPrice = 1000;
-            if (state.clicks < clickBotPrice) {
-                return false;
-            }
-            state.clicks -= clickBotPrice;
-            state.clickBots += 1;
+    buyClickBot() {
+        const clickBotPrice = 1000;
+        if (this.clicks() < clickBotPrice) {
+            return false;
         }
+        this.clicks.set(this.clicks() - clickBotPrice);
+        this.clickBots.set(this.clickBots() + 1);
+    }
+}
 
-        document.addEventListener("click", () => increment(1), true);
-
-        return {
-            state,
-            increment,
-            buyClickBot,
-        };
-    },
-};
-
-registry.category("services").add("awesome_clicker.clicker", clickerService);</code></pre>
+services.add(ClickerPlugin);</code></pre>
 
 </div>
 </div>
@@ -8202,15 +8152,15 @@ unlocked:
 <div class="after">
 <h4>After</h4>
 
-<pre><code class="language-markup">&lt;div t-if="this.clicker.state.level >= 1" class="ms-1 mt-1"&gt;
+<pre><code class="language-markup">&lt;div t-if="this.clicker.level() >= 1" class="ms-1 mt-1"&gt;
     &lt;h2&gt; Bots &lt;/h2&gt;
     &lt;div class="card"&gt;
         &lt;div class="card-header"&gt;
-            &lt;t t-out="this.clicker.state.clickBots"/&gt;x ClickBots (10 clicks/10seconds)
+            &lt;t t-out="this.clicker.clickBots()"/&gt;x ClickBots (10 clicks/10seconds)
             &lt;i class="oi" data-icon="rocket_launch"&gt;&lt;/i&gt;
         &lt;/div&gt;
         &lt;div class="card-body"&gt;
-            &lt;button t-on-click="() =&gt; this.clicker.buyClickBot()" class="btn btn-primary" t-att-disabled="this.clicker.state.clicks lt 1000"&gt;
+            &lt;button t-on-click="() =&gt; this.clicker.buyClickBot()" class="btn btn-primary" t-att-disabled="this.clicker.clicks() lt 1000"&gt;
                 Buy ClickBot (1000 clicks)
             &lt;/button&gt;
         &lt;/div&gt;
@@ -8220,191 +8170,50 @@ unlocked:
 </div>
 </div>
 
-</details>
+**Solution bis**: the `useEffect` call in `setup()` is a reusable shape on its
+own - it can be extracted into a custom `useInterval` hook:
 
-## 9. Refactor to a class model
+```js
+import { useEffect } from "@odoo/owl";
 
-The current code is written in a somewhat functional style. But to do so, we
-have to export the state and all its update functions in our clicker object. As
-this project grows, this may become more and more complex. To make it simpler,
-let us split our business logic out of our service and into a class.
+export function useInterval(callback, delay) {
+    useEffect(() => {
+        const interval = setInterval(callback, delay);
+        return () => clearInterval(interval);
+    });
+}
+```
 
-1. Create a `clicker_model` file that exports a reactive class. Move all the
-   state and update functions from the service into the model.
-2. Rewrite the clicker service to instantiate and export the clicker model
-   class.
+`ClickerPlugin.setup()` then reads:
 
-To create the `ClickerModel`, you can extend the `Reactive` class from
-`@web/core/utils/reactive`. The `Reactive` class wrap the model into a reactive
-proxy.
-
-**See also:**
-[Example of subclassing Reactive](https://github.com/odoo/odoo/blob/c638913df191dfcc5547f90b8b899e7738c386f1/addons/web/static/src/model/relational_model/datapoint.js#L32)
-
-<details>
-<summary>Show solution</summary>
-
-**static/src/clicker_model.js**
-
-<div class="diff-cols">
-<div class="before">
-<h4>Before</h4>
-
-<pre><code class="language-javascript"></code></pre>
-
-</div>
-<div class="after">
-<h4>After</h4>
-
-<pre><code class="language-javascript">import { Reactive } from "@web/core/utils/reactive";
-
-export class ClickerModel extends Reactive {
-    constructor() {
-        super();
-        this.clicks = 0;
-        this.level = 0;
-        this.clickBots = 0;
-    }
-
-    addClick() {
-        this.increment(1);
-    }
-
-    /**
-     * This method is supposed to be periodically called by outside code, at some
-     * proper interval
-     */
-    tick() {
-        this.clicks += this.clickBots * 10;
-    }
-
-    increment(inc) {
-        this.clicks += inc;
-        if (this.level < 1 && this.clicks >= 1000) {
-            this.level++;
-        }
-    }
-
-    buyClickBot() {
-        const clickBotPrice = 1000;
-        if (this.clicks < clickBotPrice) {
-            return false;
-        }
-        this.clicks -= clickBotPrice;
-        this.clickBots += 1;
-    }
-}</code></pre>
-
-</div>
-</div>
-
-`Reactive` (from `@web/core/utils/reactive`) is marked `@deprecated` in
-current master, in favor of the newer signal-based system - but it's still
-there, still Owl-3-correct (it wraps `this` in `proxy()`, the same primitive
-`useClicker` already relies on), and rewriting this whole exercise's model
-around signals would be a different, much bigger exercise than what's being
-taught here. Kept as-is.
-
-**static/src/clicker_service.js** becomes much smaller:
-
-<div class="diff-cols">
-<div class="before">
-<h4>Before</h4>
-
-<pre><code class="language-javascript">import { registry } from "@web/core/registry";
-import { proxy } from "@odoo/owl";
-
-const clickerService = {
-    start(env) {
-        const state = proxy({
-            clicks: 0,
-            level: 0,
-            clickBots: 0,
-        });
-
-        setInterval(() => {
-            state.clicks += state.clickBots * 10;
-        }, 10000);
-
-        function increment(inc) {
-            state.clicks += inc;
-            if (state.level < 1 && state.clicks >= 1000) {
-                state.level++;
-            }
-        }
-
-        function buyClickBot() {
-            const clickBotPrice = 1000;
-            if (state.clicks < clickBotPrice) {
-                return false;
-            }
-            state.clicks -= clickBotPrice;
-            state.clickBots += 1;
-        }
-
-        document.addEventListener("click", () => increment(1), true);
-
-        return {
-            state,
-            increment,
-            buyClickBot,
-        };
-    },
-};
-
-registry.category("services").add("awesome_clicker.clicker", clickerService);</code></pre>
-
-</div>
-<div class="after">
-<h4>After</h4>
-
-<pre><code class="language-javascript">import { registry } from "@web/core/registry";
-import { ClickerModel } from "./clicker_model";
-
-const clickerService = {
-    start(env) {
-        const model = new ClickerModel();
-
-        document.addEventListener("click", () => model.addClick(), true);
-        setInterval(() => {
-            model.tick();
-        }, 10000);
-
-        return model;
-    },
-};
-
-registry.category("services").add("awesome_clicker.clicker", clickerService);</code></pre>
-
-</div>
-</div>
-
-`useClicker()` (unchanged) now returns the model directly - so every
-`this.clicker.state.clicks` (in `clicker_value.js`, `clicker_value.xml`,
-`client_action.xml`) drops the `.state`, becoming `this.clicker.clicks`.
+```js
+setup() {
+    useListener(document.body, "click", () => this.increment(1), { capture: true });
+    useInterval(() => {
+        this.clicks.set(this.clicks() + this.clickBots() * 10);
+    }, 10000);
+}
+```
 
 </details>
 
-## 10. Notify when a milestone is reached
+## 9. Notify when a milestone is reached
 
 There is not much feedback that something changed when we reached 1k clicks. Let
-us use the `effect` service to communicate that information clearly. The problem
-is that our click model does not have access to services. Also, we want to keep
-as much as possible the UI concern out of the model. So, we can explore a new
-strategy for communication: event buses.
+us use `EffectPlugin` to communicate that information clearly - `ClickerPlugin`
+using another plugin, same as the systray item or the client action use
+`ClickerPlugin` itself.
 
-1. Update the clicker model to instantiate a bus, and to trigger a
-   `MILESTONE_1k` event when we reach 1000 clicks for the first time.
-2. Change the clicker service to listen to the same event on the model bus.
-3. When that happens, use the effect service to display a rainbow man. 4 Add
-   some text to explain that the user can now buy clickbots.
+1. Get a handle on `EffectPlugin` in `ClickerPlugin`, with `usePlugin`.
+2. Add a `notify(unlock)` method: it uses `EffectPlugin` to display a rainbow
+   man, with a message that explains what the player can now buy.
+3. Call it when we reach 1000 clicks for the first time.
 
 ![Milestones](_images/milestone1.png)
 
 #### See also
 
-- [Owl documentation on event bus](https://odoo.github.io/owl/documentation/v3/owl/reference/utils.html#eventbus)
-- [Documentation on effect service](https://www.odoo.com/documentation/master/developer/reference/frontend/services.html#frontend-services-effect)
+- [Owl documentation on plugins](https://odoo.github.io/owl/documentation/v3/owl/reference/plugins.html)
 
 <details>
 <summary>Show solution</summary>
@@ -8413,98 +8222,76 @@ strategy for communication: event buses.
 <div class="before">
 <h4>Before</h4>
 
-<pre><code class="language-javascript">import { Reactive } from "@web/core/utils/reactive";
+<pre><code class="language-javascript">import { Plugin, signal, useListener, useEffect } from "@odoo/owl";
+import { services } from "@web/core/services";
 
-export class ClickerModel extends Reactive {
-    constructor() {
-        super();
-        this.clicks = 0;
-        this.level = 0;
-        this.clickBots = 0;
-    }</code></pre>
+export class ClickerPlugin extends Plugin {
+    clicks = signal(0);
+    level = signal(0);
+    clickBots = signal(0);
 
-</div>
-<div class="after">
-<h4>After</h4>
-
-<pre><code class="language-javascript">import { Reactive } from "@web/core/utils/reactive";
-import { EventBus } from "@odoo/owl";
-
-export class ClickerModel extends Reactive {
-    constructor() {
-        super();
-        this.clicks = 0;
-        this.level = 0;
-        this.clickBots = 0;
-        this.bus = new EventBus();
-    }</code></pre>
-
-</div>
-</div>
-
-and in `increment()`, `this.bus.trigger("MILESTONE_1k");` right before
-`this.level++;`.
-
-**static/src/clicker_service.js**, listening on that bus:
-
-<div class="diff-cols">
-<div class="before">
-<h4>Before</h4>
-
-<pre><code class="language-javascript">import { registry } from "@web/core/registry";
-import { ClickerModel } from "./clicker_model";
-
-const clickerService = {
-    start(env) {
-        const model = new ClickerModel();
-
-        document.addEventListener("click", () => model.addClick(), true);
-        setInterval(() => {
-            model.tick();
-        }, 10000);
-
-        return model;
-    },
-};
-
-registry.category("services").add("awesome_clicker.clicker", clickerService);</code></pre>
-
-</div>
-<div class="after">
-<h4>After</h4>
-
-<pre><code class="language-javascript">import { registry } from "@web/core/registry";
-import { ClickerModel } from "./clicker_model";
-
-const clickerService = {
-    dependencies: ["effect"],
-    start(env, services) {
-        const model = new ClickerModel();
-
-        document.addEventListener("click", () => model.addClick(), true);
-        setInterval(() => {
-            model.tick();
-        }, 10000);
-        const bus = model.bus;
-        bus.addEventListener("MILESTONE_1k", () => {
-            services.effect.add({
-                message: "Milestone reached! You can now buy clickbots",
-                type: "rainbow_man",
-            });
+    setup() {
+        useListener(document.body, "click", () => this.increment(1), { capture: true });
+        useEffect(() => {
+            const interval = setInterval(() => {
+                this.clicks.set(this.clicks() + this.clickBots() * 10);
+            }, 10000);
+            return () => clearInterval(interval);
         });
+    }
 
-        return model;
-    },
-};
+    increment(inc) {
+        this.clicks.set(this.clicks() + inc);
+        if (this.level() < 1 && this.clicks() >= 1000) {
+            this.level.set(1);
+        }
+    }</code></pre>
 
-registry.category("services").add("awesome_clicker.clicker", clickerService);</code></pre>
+</div>
+<div class="after">
+<h4>After</h4>
+
+<pre><code class="language-javascript">import { Plugin, signal, useListener, useEffect, usePlugin } from "@odoo/owl";
+import { services } from "@web/core/services";
+import { EffectPlugin } from "@web/core/effects/effect_plugin";
+
+export class ClickerPlugin extends Plugin {
+    clicks = signal(0);
+    level = signal(0);
+    clickBots = signal(0);
+    effect = usePlugin(EffectPlugin);
+
+    setup() {
+        useListener(document.body, "click", () => this.increment(1), { capture: true });
+        useEffect(() => {
+            const interval = setInterval(() => {
+                this.clicks.set(this.clicks() + this.clickBots() * 10);
+            }, 10000);
+            return () => clearInterval(interval);
+        });
+    }
+
+    notify(unlock) {
+        this.effect.add({
+            message: `Milestone reached! You can now buy ${unlock}`,
+            type: "rainbow_man",
+        });
+    }
+
+    increment(inc) {
+        this.clicks.set(this.clicks() + inc);
+        if (this.level() < 1 && this.clicks() >= 1000) {
+            this.notify("clickbots");
+            this.level.set(1);
+        }
+    }</code></pre>
 
 </div>
 </div>
 
 </details>
 
-## 11. Add BigBots
+## 10. Add BigBots
 
 Clearly, we need a way to provide the player with more choices. Let us add a new
 type of clickbot: `BigBots`, which are just more powerful: they provide with 100
@@ -8525,53 +8312,61 @@ one of the special aliases: `gt`, `gte`, `lt` or `lte`. See the
 <details>
 <summary>Show solution</summary>
 
-No Owl adaptation needed from here on - the rest of this exercise is plain
-JS/model work. `clickBots` becomes a `bots` dict (`clickbot`, `bigbot`, each
-with its own price/level/increment/purchased), `MILESTONE_1k` becomes a
-generic `MILESTONE` event carrying `this.milestones[this.level]`, and
-`buyClickBot()` becomes `buyBot(name)`.
+Signals stay explicit throughout this part: `clickBots` becomes a `bots`
+dict (`clickbot`, `bigbot`), each with a static price/level/increment plus its
+own `purchased` signal for the one value that actually changes.
+`buyClickBot()` becomes `buyBot(name)`, and the single hardcoded
+`this.notify("clickbots")` call becomes a lookup in
+`this.milestones[this.level()]`.
 
-**static/src/clicker_model.js**
+**static/src/clicker_plugin.js**
 
 <div class="diff-cols">
 <div class="before">
 <h4>Before</h4>
 
-<pre><code class="language-javascript">import { Reactive } from "@web/core/utils/reactive";
-import { EventBus } from "@odoo/owl";
+<pre><code class="language-javascript">import { Plugin, signal, useListener, useEffect, usePlugin } from "@odoo/owl";
+import { services } from "@web/core/services";
+import { EffectPlugin } from "@web/core/effects/effect_plugin";
 
-export class ClickerModel extends Reactive {
-    constructor() {
-        super();
-        this.clicks = 0;
-        this.level = 0;
-        this.clickBots = 0;
-        this.bus = new EventBus();
+export class ClickerPlugin extends Plugin {
+    clicks = signal(0);
+    level = signal(0);
+    clickBots = signal(0);
+    effect = usePlugin(EffectPlugin);
+
+    setup() {
+        useListener(document.body, "click", () => this.increment(1), { capture: true });
+        useEffect(() => {
+            const interval = setInterval(() => {
+                this.clicks.set(this.clicks() + this.clickBots() * 10);
+            }, 10000);
+            return () => clearInterval(interval);
+        });
     }
 
-    addClick() {
-        this.increment(1);
-    }
-
-    tick() {
-        this.clicks += this.clickBots * 10;
+    notify(unlock) {
+        this.effect.add({
+            message: `Milestone reached! You can now buy ${unlock}`,
+            type: "rainbow_man",
+        });
     }
 
     increment(inc) {
-        this.clicks += inc;
-        if (this.level < 1 && this.clicks >= 1000) {
-            this.bus.trigger("MILESTONE_1k");
-            this.level++;
+        this.clicks.set(this.clicks() + inc);
+        if (this.level() < 1 && this.clicks() >= 1000) {
+            this.notify("clickbots");
+            this.level.set(1);
         }
     }
 
     buyClickBot() {
         const clickBotPrice = 1000;
-        if (this.clicks < clickBotPrice) {
+        if (this.clicks() < clickBotPrice) {
             return false;
         }
-        this.clicks -= clickBotPrice;
-        this.clickBots += 1;
+        this.clicks.set(this.clicks() - clickBotPrice);
+        this.clickBots.set(this.clickBots() + 1);
     }
 }</code></pre>
 
@@ -8579,63 +8374,72 @@ export class ClickerModel extends Reactive {
 <div class="after">
 <h4>After</h4>
 
-<pre><code class="language-javascript">import { Reactive } from "@web/core/utils/reactive";
-import { EventBus } from "@odoo/owl";
+<pre><code class="language-javascript">import { Plugin, signal, useListener, useEffect, usePlugin } from "@odoo/owl";
+import { services } from "@web/core/services";
+import { EffectPlugin } from "@web/core/effects/effect_plugin";
 
-export class ClickerModel extends Reactive {
-    constructor() {
-        super();
-        this.clicks = 0;
-        this.level = 0;
-        this.bus = new EventBus();
-        this.bots = {
-            clickbot: { price: 1000, level: 1, increment: 10, purchased: 0 },
-            bigbot: { price: 5000, level: 2, increment: 100, purchased: 0 },
-        };
+const MILESTONES = [
+    { level: 1, clicks: 1000, unlock: "clickbot" },
+    { level: 2, clicks: 5000, unlock: "bigbot" },
+];
+
+export class ClickerPlugin extends Plugin {
+    clicks = signal(0);
+    level = signal(0);
+    effect = usePlugin(EffectPlugin);
+
+    bots = {
+        clickbot: { price: 1000, level: 1, increment: 10, purchased: signal(0) },
+        bigbot: { price: 5000, level: 2, increment: 100, purchased: signal(0) },
+    };
+
+    setup() {
+        useListener(document.body, "click", () => this.increment(1), { capture: true });
+        useEffect(() => {
+            const interval = setInterval(() => this._tick(), 10000);
+            return () => clearInterval(interval);
+        });
     }
 
-    addClick() {
-        this.increment(1);
-    }
-
-    tick() {
-        for (const bot in this.bots) {
-            this.clicks += this.bots[bot].increment * this.bots[bot].purchased;
+    _tick() {
+        let total = 0;
+        for (const bot of Object.values(this.bots)) {
+            total += bot.increment * bot.purchased();
         }
+        this.clicks.set(this.clicks() + total);
+    }
+
+    notify(unlock) {
+        this.effect.add({
+            message: `Milestone reached! You can now buy ${unlock}`,
+            type: "rainbow_man",
+        });
     }
 
     increment(inc) {
-        this.clicks += inc;
-        if (this.milestones[this.level] && this.clicks >= this.milestones[this.level].clicks) {
-            this.bus.trigger("MILESTONE", this.milestones[this.level]);
-            this.level += 1;
+        this.clicks.set(this.clicks() + inc);
+        const milestone = MILESTONES.find((m) => m.level === this.level() + 1);
+        if (milestone && this.clicks() >= milestone.clicks) {
+            this.notify(milestone.unlock);
+            this.level.set(milestone.level);
         }
     }
 
     buyBot(name) {
-        if (!Object.keys(this.bots).includes(name)) {
+        const bot = this.bots[name];
+        if (!bot) {
             throw new Error(`Invalid bot name ${name}`);
         }
-        if (this.clicks < this.bots[name].price) {
+        if (this.clicks() < bot.price) {
             return false;
         }
-        this.clicks -= this.bots[name].price;
-        this.bots[name].purchased += 1;
-    }
-
-    get milestones() {
-        return [
-            { clicks: 1000, unlock: "clickBot" },
-            { clicks: 5000, unlock: "bigBot" },
-        ];
+        this.clicks.set(this.clicks() - bot.price);
+        bot.purchased.set(bot.purchased() + 1);
     }
 }</code></pre>
 
 </div>
 </div>
-
-`clicker_service.js`'s listener becomes
-`bus.addEventListener("MILESTONE", (ev) => services.effect.add({ message: \`Milestone reached! You can now buy ${ev.detail.unlock}\`, type: "rainbow_man" }));`
 
 **static/src/client_action/client_action.xml**, looping over the bots instead of one hardcoded card:
 
@@ -8643,15 +8447,15 @@ export class ClickerModel extends Reactive {
 <div class="before">
 <h4>Before</h4>
 
-<pre><code class="language-markup">&lt;div t-if="this.clicker.state.level >= 1" class="ms-1 mt-1"&gt;
+<pre><code class="language-markup">&lt;div t-if="this.clicker.level() >= 1" class="ms-1 mt-1"&gt;
     &lt;h2&gt; Bots &lt;/h2&gt;
     &lt;div class="card"&gt;
         &lt;div class="card-header"&gt;
-            &lt;t t-out="this.clicker.state.clickBots"/&gt;x ClickBots (10 clicks/10seconds)
+            &lt;t t-out="this.clicker.clickBots()"/&gt;x ClickBots (10 clicks/10seconds)
             &lt;i class="oi" data-icon="rocket_launch"&gt;&lt;/i&gt;
         &lt;/div&gt;
         &lt;div class="card-body"&gt;
-            &lt;button t-on-click="() =&gt; this.clicker.buyClickBot()" class="btn btn-primary" t-att-disabled="this.clicker.state.clicks lt 1000"&gt;
+            &lt;button t-on-click="() =&gt; this.clicker.buyClickBot()" class="btn btn-primary" t-att-disabled="this.clicker.clicks() lt 1000"&gt;
                 Buy ClickBot (1000 clicks)
             &lt;/button&gt;
         &lt;/div&gt;
@@ -8662,17 +8466,17 @@ export class ClickerModel extends Reactive {
 <div class="after">
 <h4>After</h4>
 
-<pre><code class="language-markup">&lt;div t-if="this.clicker.level >= 1" class="ms-1 mt-1"&gt;
+<pre><code class="language-markup">&lt;div t-if="this.clicker.level() >= 1" class="ms-1 mt-1"&gt;
     &lt;h2&gt; Bots &lt;/h2&gt;
     &lt;div class="d-flex flex-row"&gt;
         &lt;t t-foreach="this.clicker.bots" t-as="bot" t-key="bot"&gt;
-            &lt;div t-if="bot_value.level lte this.clicker.level" class="card me-3"&gt;
+            &lt;div t-if="bot_value.level lte this.clicker.level()" class="card me-3"&gt;
                 &lt;div class="card-header"&gt;
-                    &lt;t t-out="bot_value.purchased"/&gt;x &lt;t t-out="bot"/&gt; (&lt;t t-out="bot_value.increment"/&gt; clicks/10seconds)
+                    &lt;t t-out="bot_value.purchased()"/&gt;x &lt;t t-out="bot"/&gt; (&lt;t t-out="bot_value.increment"/&gt; clicks/10seconds)
                     &lt;i class="oi" data-icon="rocket_launch"&gt;&lt;/i&gt;
                 &lt;/div&gt;
                 &lt;div class="card-body"&gt;
-                    &lt;button t-on-click="() =&gt; this.clicker.buyBot(bot)" class="btn btn-primary" t-att-disabled="this.clicker.clicks lt bot_value.price"&gt;
+                    &lt;button t-on-click="() =&gt; this.clicker.buyBot(bot)" class="btn btn-primary" t-att-disabled="this.clicker.clicks() lt bot_value.price"&gt;
                         Buy &lt;t t-out="bot"/&gt; (&lt;t t-out="bot_value.price"/&gt; clicks)
                     &lt;/button&gt;
                 &lt;/div&gt;
@@ -8686,7 +8490,7 @@ export class ClickerModel extends Reactive {
 
 </details>
 
-## 12. Add a new type of resource: power
+## 11. Add a new type of resource: power
 
 Now, to add another scaling point, let us add a new type of resource: a power
 multiplier. This is a number that can be increased at level >= 3, and multiplies
@@ -8702,37 +8506,75 @@ provide us with `power*N` clicks).
 <details>
 <summary>Show solution</summary>
 
-In `clicker_model.js`: a `this.multiplier = 1` in the constructor, `tick()`
-multiplies each bot's contribution by it, a new `buyMultiplier()` method
-(costs 50000 clicks), and a third milestone `{ clicks: 100000, unlock: "power multiplier" }`.
+A `multiplier` signal (starting at 1), `_tick()` multiplies each bot's
+contribution by it, a new `buyMultiplier()` method (costs 50000 clicks), and a
+third milestone `{ level: 3, clicks: 100000, unlock: "power multiplier" }`.
+
+**static/src/clicker_plugin.js**
 
 <div class="diff-cols">
 <div class="before">
 <h4>Before</h4>
 
-<pre><code class="language-javascript">tick() {
-    for (const bot in this.bots) {
-        this.clicks += this.bots[bot].increment * this.bots[bot].purchased;
-    }
-}</code></pre>
+<pre><code class="language-javascript">const MILESTONES = [
+    { level: 1, clicks: 1000, unlock: "clickbot" },
+    { level: 2, clicks: 5000, unlock: "bigbot" },
+];
+
+export class ClickerPlugin extends Plugin {
+    clicks = signal(0);
+    level = signal(0);
+    effect = usePlugin(EffectPlugin);
+
+    bots = {
+        clickbot: { price: 1000, level: 1, increment: 10, purchased: signal(0) },
+        bigbot: { price: 5000, level: 2, increment: 100, purchased: signal(0) },
+    };
+
+    _tick() {
+        let total = 0;
+        for (const bot of Object.values(this.bots)) {
+            total += bot.increment * bot.purchased();
+        }
+        this.clicks.set(this.clicks() + total);
+    }</code></pre>
 
 </div>
 <div class="after">
 <h4>After</h4>
 
-<pre><code class="language-javascript">tick() {
-    for (const bot in this.bots) {
-        this.clicks += this.bots[bot].increment * this.bots[bot].purchased * this.multiplier;
-    }
-}
+<pre><code class="language-javascript">const MILESTONES = [
+    { level: 1, clicks: 1000, unlock: "clickbot" },
+    { level: 2, clicks: 5000, unlock: "bigbot" },
+    { level: 3, clicks: 100000, unlock: "power multiplier" },
+];
 
-buyMultiplier() {
-    if (this.clicks < 50000) {
-        return false;
+export class ClickerPlugin extends Plugin {
+    clicks = signal(0);
+    level = signal(0);
+    multiplier = signal(1);
+    effect = usePlugin(EffectPlugin);
+
+    bots = {
+        clickbot: { price: 1000, level: 1, increment: 10, purchased: signal(0) },
+        bigbot: { price: 5000, level: 2, increment: 100, purchased: signal(0) },
+    };
+
+    _tick() {
+        let total = 0;
+        for (const bot of Object.values(this.bots)) {
+            total += bot.increment * bot.purchased() * this.multiplier();
+        }
+        this.clicks.set(this.clicks() + total);
     }
-    this.clicks -= 50000;
-    this.multiplier++;
-}</code></pre>
+
+    buyMultiplier() {
+        if (this.clicks() < 50000) {
+            return false;
+        }
+        this.clicks.set(this.clicks() - 50000);
+        this.multiplier.set(this.multiplier() + 1);
+    }</code></pre>
 
 </div>
 </div>
@@ -8749,16 +8591,16 @@ buyMultiplier() {
 <div class="after">
 <h4>After</h4>
 
-<pre><code class="language-markup">&lt;div t-if="this.clicker.level >= 3" class="ms-1 mt-1"&gt;
+<pre><code class="language-markup">&lt;div t-if="this.clicker.level() >= 3" class="ms-1 mt-1"&gt;
     &lt;h2&gt; Power multiplier &lt;/h2&gt;
     &lt;div class="d-flex flex-row"&gt;
         &lt;div class="card me-3"&gt;
             &lt;div class="card-header"&gt;
-                &lt;t t-out="this.clicker.multiplier"/&gt;x
+                &lt;t t-out="this.clicker.multiplier()"/&gt;x
                 &lt;i class="oi" data-icon="flash_on"&gt;&lt;/i&gt;
             &lt;/div&gt;
             &lt;div class="card-body"&gt;
-                &lt;button t-on-click="() =&gt; this.clicker.buyMultiplier()" class="btn btn-primary" t-att-disabled="this.clicker.clicks lt 50000"&gt;
+                &lt;button t-on-click="() =&gt; this.clicker.buyMultiplier()" class="btn btn-primary" t-att-disabled="this.clicker.clicks() lt 50000"&gt;
                     Buy Power Multiplier (50000 clicks)
                 &lt;/button&gt;
             &lt;/div&gt;
@@ -8769,12 +8611,12 @@ buyMultiplier() {
 </div>
 </div>
 
-The bots card's clicks/10s figure also grows a `* this.clicker.multiplier`
-factor: `<t t-out="bot_value.increment * this.clicker.multiplier"/>`.
+The bots card's clicks/10s figure also grows a `* this.clicker.multiplier()`
+factor: `<t t-out="bot_value.increment * this.clicker.multiplier()"/>`.
 
 </details>
 
-## 13. Define some random rewards
+## 12. Define some random rewards
 
 We want the user to obtain sometimes bonuses, to reward using Odoo. A reward is
 an object with:
@@ -8793,14 +8635,16 @@ an object with:
      {
        description: "Get 1 click bot",
        apply(clicker) {
-         clicker.increment(1);
+         const bot = clicker.bots.clickbot;
+         bot.purchased.set(bot.purchased() + 1);
        },
        maxLevel: 3,
      },
      {
        description: "Get 10 click bot",
        apply(clicker) {
-         clicker.increment(10);
+         const bot = clicker.bots.clickbot;
+         bot.purchased.set(bot.purchased() + 10);
        },
        minLevel: 3,
        maxLevel: 4,
@@ -8808,7 +8652,7 @@ an object with:
      {
        description: "Increase bot power!",
        apply(clicker) {
-         clicker.multipler += 1;
+         clicker.multiplier.set(clicker.multiplier() + 1);
        },
        minLevel: 3,
      },
@@ -8841,14 +8685,16 @@ an object with:
     {
         description: "Get 1 click bot",
         apply(clicker) {
-            clicker.increment(1);
+            const bot = clicker.bots.clickbot;
+            bot.purchased.set(bot.purchased() + 1);
         },
         maxLevel: 3,
     },
     {
         description: "Get 10 click bot",
         apply(clicker) {
-            clicker.increment(10);
+            const bot = clicker.bots.clickbot;
+            bot.purchased.set(bot.purchased() + 10);
         },
         minLevel: 3,
         maxLevel: 4,
@@ -8856,7 +8702,7 @@ an object with:
     {
         description: "Increase bot power!",
         apply(clicker) {
-            clicker.multipler += 1;
+            clicker.multiplier.set(clicker.multiplier() + 1);
         },
         minLevel: 3,
     },
@@ -8884,7 +8730,7 @@ an object with:
 </div>
 </div>
 
-**static/src/clicker_model.js**, a `giveReward()` method:
+**static/src/clicker_plugin.js**, a `giveReward()` method:
 
 <div class="diff-cols">
 <div class="before">
@@ -8899,8 +8745,8 @@ an object with:
 <pre><code class="language-javascript">giveReward() {
     const availableReward = [];
     for (const reward of rewards) {
-        if (reward.minLevel <= this.level || !reward.minLevel) {
-            if (reward.maxLevel >= this.level || !reward.maxLevel) {
+        if (reward.minLevel <= this.level() || !reward.minLevel) {
+            if (reward.maxLevel >= this.level() || !reward.maxLevel) {
                 availableReward.push(reward);
             }
         }
@@ -8916,11 +8762,11 @@ an object with:
 
 </details>
 
-## 14. Provide a reward when opening a form view
+## 13. Provide a reward when opening a form view
 
 1. Patch the form controller. Each time a form controller is created, it should
    randomly decides (1% chance) if a reward should be given.
-2. If the answer is yes, call a method `getReward` on the model.
+2. If the answer is yes, call a method `giveReward` on `ClickerPlugin`.
 3. That method should choose a reward, send a sticky notification, with a button
    `Collect` that will then apply the reward, and finally, it should open the
    `clicker` client action.
@@ -8936,7 +8782,8 @@ an object with:
 <details>
 <summary>Show solution</summary>
 
-**static/src/clicker_model.js**, `giveReward()` also triggers a `REWARD` event:
+**static/src/clicker_plugin.js**, `giveReward()` shows the notification
+itself and opens the client action - two more plugins in a plugin:
 
 <div class="diff-cols">
 <div class="before">
@@ -8945,8 +8792,8 @@ an object with:
 <pre><code class="language-javascript">giveReward() {
     const availableReward = [];
     for (const reward of rewards) {
-        if (reward.minLevel <= this.level || !reward.minLevel) {
-            if (reward.maxLevel >= this.level || !reward.maxLevel) {
+        if (reward.minLevel <= this.level() || !reward.minLevel) {
+            if (reward.maxLevel >= this.level() || !reward.maxLevel) {
                 availableReward.push(reward);
             }
         }
@@ -8961,36 +8808,14 @@ an object with:
 <pre><code class="language-javascript">giveReward() {
     const availableReward = [];
     for (const reward of rewards) {
-        if (reward.minLevel <= this.level || !reward.minLevel) {
-            if (reward.maxLevel >= this.level || !reward.maxLevel) {
+        if (reward.minLevel <= this.level() || !reward.minLevel) {
+            if (reward.maxLevel >= this.level() || !reward.maxLevel) {
                 availableReward.push(reward);
             }
         }
     }
     const reward = choose(availableReward);
-    this.bus.trigger("REWARD", reward);
-    return choose(availableReward);
-}</code></pre>
-
-</div>
-</div>
-
-**static/src/clicker_service.js** listens for it, and shows a sticky
-notification with a Collect button:
-
-<div class="diff-cols">
-<div class="before">
-<h4>Before</h4>
-
-<pre><code class="language-javascript"></code></pre>
-
-</div>
-<div class="after">
-<h4>After</h4>
-
-<pre><code class="language-javascript">bus.addEventListener("REWARD", (ev) => {
-    const reward = ev.detail;
-    const closeNotification = services.notification.add(
+    const closeNotification = this.notification.add(
         `Congrats you won a reward: "${reward.description}"`,
         {
             type: "success",
@@ -8999,25 +8824,27 @@ notification with a Collect button:
                 {
                     name: "Collect",
                     onClick: () => {
-                        reward.apply(model);
+                        reward.apply(this);
                         closeNotification();
-                        services.action.doAction({
+                        this.action.doAction({
                             type: "ir.actions.client",
                             tag: "awesome_clicker.client_action",
                             target: "new",
-                            name: "Clicker Game"
+                            name: "Clicker Game",
                         });
                     },
                 },
             ],
         }
     );
-});</code></pre>
+}</code></pre>
 
 </div>
 </div>
 
-(`dependencies` grows to `["action", "effect", "notification"]`.)
+with `action = usePlugin(ActionPlugin)` and
+`notification = usePlugin(NotificationPlugin)` added as fields, next to
+`effect`.
 
 **static/src/form_controller/form_controller_patch.js**
 
@@ -9052,7 +8879,7 @@ patch(FormController.prototype, FormControllerPatch);</code></pre>
 
 </details>
 
-## 15. Add commands in command palette
+## 14. Add commands in command palette
 
 Let us now provide more interesting ways to interact with our game.
 
@@ -9079,23 +8906,28 @@ Let us now provide more interesting ways to interact with our game.
 <div class="after">
 <h4>After</h4>
 
-<pre><code class="language-javascript">import { registry } from "@web/core/registry";
+<pre><code class="language-javascript">import { usePlugin } from "@odoo/owl";
+import { registry } from "@web/core/registry";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
+import { ClickerPlugin } from "./clicker_plugin";
 
 const commandProviderRegistry = registry.category("command_provider");
 
 commandProviderRegistry.add("clicker", {
-    provide: (env, options) => {
+    provide() {
+        const clicker = usePlugin(ClickerPlugin);
+        const action = usePlugin(ActionPlugin);
         return [
             {
                 name: "Buy 1 click bot",
                 action() {
-                    env.services["awesome_clicker.clicker"].buyBot("clickbot");
+                    clicker.buyBot("clickbot");
                 },
             },
             {
                 name: "Open Clicker Game",
                 action() {
-                    env.services.action.doAction({
+                    action.doAction({
                         type: "ir.actions.client",
                         tag: "awesome_clicker.client_action",
                         target: "new",
@@ -9110,9 +8942,12 @@ commandProviderRegistry.add("clicker", {
 </div>
 </div>
 
+`provide()` runs inside the command palette's own plugin scope, so
+`usePlugin` works directly.
+
 </details>
 
-## 16. Add yet another resource: trees
+## 15. Add yet another resource: trees
 
 It is now time to introduce a completely new type of resources. Here is one that
 should not be too controversial: trees. We will now allow the user to plant
@@ -9130,26 +8965,38 @@ with fruits (either pears or cherries).
 <details>
 <summary>Show solution</summary>
 
-**static/src/clicker_model.js**: a `trees` dict (pearTree, cherryTree, each
-1000000 clicks, unlocked at level 4) and a `fruits` dict, ticked every 3rd
-`tick()` call (so every 30s, since `tick()` itself runs every 10s):
+**static/src/clicker_plugin.js**: a `trees` dict (pearTree, cherryTree, each
+1000000 clicks, unlocked at level 4, with a `purchased` signal) and a
+`fruits` dict of signals, grown by their own `_tickFruits()`, on its own
+30s interval:
 
 <div class="diff-cols">
 <div class="before">
 <h4>Before</h4>
 
-<pre><code class="language-javascript"></code></pre>
+<pre><code class="language-javascript">bots = {
+    clickbot: { price: 1000, level: 1, increment: 10, purchased: signal(0) },
+    bigbot: { price: 5000, level: 2, increment: 100, purchased: signal(0) },
+};</code></pre>
 
 </div>
 <div class="after">
 <h4>After</h4>
 
-<pre><code class="language-javascript">this.trees = {
-    pearTree: { price: 1000000, level: 4, produce: "pear", purchased: 0 },
-    cherryTree: { price: 1000000, level: 4, produce: "cherry", purchased: 0 },
+<pre><code class="language-javascript">bots = {
+    clickbot: { price: 1000, level: 1, increment: 10, purchased: signal(0) },
+    bigbot: { price: 5000, level: 2, increment: 100, purchased: signal(0) },
 };
-this.fruits = { pear: 0, cherry: 0 };
-this.ticks = 0;</code></pre>
+
+trees = {
+    pearTree: { price: 1000000, level: 4, produce: "pear", purchased: signal(0) },
+    cherryTree: { price: 1000000, level: 4, produce: "cherry", purchased: signal(0) },
+};
+
+fruits = {
+    pear: signal(0),
+    cherry: signal(0),
+};</code></pre>
 
 </div>
 </div>
@@ -9158,43 +9005,53 @@ this.ticks = 0;</code></pre>
 <div class="before">
 <h4>Before</h4>
 
-<pre><code class="language-javascript">tick() {
-    for (const bot in this.bots) {
-        this.clicks += this.bots[bot].increment * this.bots[bot].purchased * this.multiplier;
-    }
+<pre><code class="language-javascript">setup() {
+    useListener(document.body, "click", () => this.increment(1), { capture: true });
+    useEffect(() => {
+        const interval = setInterval(() => this._tick(), 10000);
+        return () => clearInterval(interval);
+    });
 }</code></pre>
 
 </div>
 <div class="after">
 <h4>After</h4>
 
-<pre><code class="language-javascript">tick() {
-    this.ticks++;
-    for (const bot in this.bots) {
-        this.clicks += this.bots[bot].increment * this.bots[bot].purchased * this.multiplier;
-    }
-    if (this.ticks % 3 === 0) {
-        for (const tree in this.trees) {
-            this.fruits[this.trees[tree].produce] += this.trees[tree].purchased;
-        }
+<pre><code class="language-javascript">setup() {
+    useListener(document.body, "click", () => this.increment(1), { capture: true });
+    useEffect(() => {
+        const interval = setInterval(() => this._tick(), 10000);
+        return () => clearInterval(interval);
+    });
+    useEffect(() => {
+        const interval = setInterval(() => this._tickFruits(), 30000);
+        return () => clearInterval(interval);
+    });
+}
+
+_tickFruits() {
+    for (const tree of Object.values(this.trees)) {
+        const fruit = this.fruits[tree.produce];
+        fruit.set(fruit() + tree.purchased());
     }
 }
 
 buyTree(name) {
-    if (!Object.keys(this.trees).includes(name)) {
+    const tree = this.trees[name];
+    if (!tree) {
         throw new Error(`Invalid tree name ${name}`);
     }
-    if (this.clicks < this.trees[name].price) {
+    if (this.clicks() < tree.price) {
         return false;
     }
-    this.clicks -= this.trees[name].price;
-    this.trees[name].purchased += 1;
+    this.clicks.set(this.clicks() - tree.price);
+    tree.purchased.set(tree.purchased() + 1);
 }</code></pre>
 
 </div>
 </div>
 
-plus a fourth milestone `{ clicks: 1000000, unlock: "pear tree & cherry tree" }`.
+plus a fourth milestone `{ level: 4, clicks: 1000000, unlock: "pear tree & cherry tree" }`.
 
 **static/src/client_action/client_action.xml**, a new section once level 4 is reached:
 
@@ -9208,17 +9065,17 @@ plus a fourth milestone `{ clicks: 1000000, unlock: "pear tree & cherry tree" }`
 <div class="after">
 <h4>After</h4>
 
-<pre><code class="language-markup">&lt;div t-if="this.clicker.level >= 4" class="ms-1 mt-1"&gt;
+<pre><code class="language-markup">&lt;div t-if="this.clicker.level() >= 4" class="ms-1 mt-1"&gt;
     &lt;h2&gt; Trees &lt;/h2&gt;
     &lt;div class="d-flex flex-row"&gt;
         &lt;t t-foreach="this.clicker.trees" t-as="tree" t-key="tree"&gt;
-            &lt;div t-if="tree_value.level lte this.clicker.level" class="card me-3"&gt;
+            &lt;div t-if="tree_value.level lte this.clicker.level()" class="card me-3"&gt;
                 &lt;div class="card-header"&gt;
-                    &lt;t t-out="tree_value.purchased"/&gt;x &lt;t t-out="tree"/&gt; (1x &lt;t t-out="tree_value.produce"/&gt; /30seconds)
+                    &lt;t t-out="tree_value.purchased()"/&gt;x &lt;t t-out="tree"/&gt; (1x &lt;t t-out="tree_value.produce"/&gt; /30seconds)
                     &lt;i class="oi" data-icon="park"&gt;&lt;/i&gt;
                 &lt;/div&gt;
                 &lt;div class="card-body"&gt;
-                    &lt;button t-on-click="() =&gt; this.clicker.buyTree(tree)" class="btn btn-primary" t-att-disabled="this.clicker.clicks lt tree_value.price"&gt;
+                    &lt;button t-on-click="() =&gt; this.clicker.buyTree(tree)" class="btn btn-primary" t-att-disabled="this.clicker.clicks() lt tree_value.price"&gt;
                         Buy &lt;t t-out="tree"/&gt; (&lt;t t-out="tree_value.price"/&gt; clicks)
                     &lt;/button&gt;
                 &lt;/div&gt;
@@ -9231,7 +9088,7 @@ plus a fourth milestone `{ clicks: 1000000, unlock: "pear tree & cherry tree" }`
         &lt;t t-foreach="this.clicker.fruits" t-as="fruit" t-key="fruit"&gt;
             &lt;div class="card me-3"&gt;
                 &lt;div class="card-header"&gt;
-                    &lt;t t-out="fruit_value"/&gt;x &lt;t t-out="fruit"/&gt;
+                    &lt;t t-out="fruit_value()"/&gt;x &lt;t t-out="fruit"/&gt;
                 &lt;/div&gt;
             &lt;/div&gt;
         &lt;/t&gt;
@@ -9243,7 +9100,7 @@ plus a fourth milestone `{ clicks: 1000000, unlock: "pear tree & cherry tree" }`
 
 </details>
 
-## 17. Use a dropdown menu for the systray item
+## 16. Use a dropdown menu for the systray item
 
 Our game starts to become interesting. But for now, the systray only displays
 the total number of clicks. We want to see more information: the total number of
@@ -9267,29 +9124,25 @@ commands and some more information. Let us use a dropdown menu!
 <div class="before">
 <h4>Before</h4>
 
-<pre><code class="language-javascript">import { Component, usePlugin } from "@odoo/owl";
-import { registry } from "@web/core/registry";
+<pre><code class="language-javascript">import { registry } from "@web/core/registry";
+import { Component, usePlugin } from "@odoo/owl";
 import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 import { useClicker } from "../clicker_hook";
 import { ClickerValue } from "../clicker_value/clicker_value";
 
 export class ClickerSystray extends Component {
     static template = "awesome_clicker.ClickerSystray";
-    static props = {};
     static components = { ClickerValue };
 
     action = usePlugin(ActionPlugin);
-
-    setup() {
-        this.clicker = useClicker();
-    }
+    clicker = useClicker();
 
     openClientAction() {
         this.action.doAction({
             type: "ir.actions.client",
             tag: "awesome_clicker.client_action",
             target: "new",
-            name: "Clicker Game"
+            name: "Clicker",
         });
     }
 }</code></pre>
@@ -9298,8 +9151,8 @@ export class ClickerSystray extends Component {
 <div class="after">
 <h4>After</h4>
 
-<pre><code class="language-javascript">import { Component, usePlugin } from "@odoo/owl";
-import { registry } from "@web/core/registry";
+<pre><code class="language-javascript">import { registry } from "@web/core/registry";
+import { Component, usePlugin } from "@odoo/owl";
 import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 import { useClicker } from "../clicker_hook";
 import { ClickerValue } from "../clicker_value/clicker_value";
@@ -9311,32 +9164,29 @@ export class ClickerSystray extends Component {
     static components = { ClickerValue, Dropdown, DropdownItem };
 
     action = usePlugin(ActionPlugin);
-
-    setup() {
-        this.clicker = useClicker();
-    }
+    clicker = useClicker();
 
     openClientAction() {
         this.action.doAction({
             type: "ir.actions.client",
             tag: "awesome_clicker.client_action",
             target: "new",
-            name: "Clicker Game"
+            name: "Clicker",
         });
     }
 
     get numberTrees() {
         let sum = 0;
-        for (const tree in this.clicker.trees) {
-            sum += this.clicker.trees[tree].purchased;
+        for (const tree of Object.values(this.clicker.trees)) {
+            sum += tree.purchased();
         }
         return sum;
     }
 
     get numberFruits() {
         let sum = 0;
-        for (const fruit in this.clicker.fruits) {
-            sum += this.clicker.fruits[fruit];
+        for (const fruit of Object.values(this.clicker.fruits)) {
+            sum += fruit();
         }
         return sum;
     }
@@ -9344,9 +9194,6 @@ export class ClickerSystray extends Component {
 
 </div>
 </div>
-
-Omitting `props` entirely already means "accept and validate nothing" - no
-need to declare an explicit empty schema.
 
 **static/src/clicker_systray_item/clicker_systray_item.xml**, nothing else
 touched it since part 1:
@@ -9389,11 +9236,11 @@ touched it since part 1:
                         &lt;button class="btn btn-secondary" t-on-click="() =&gt; this.clicker.buyBot('clickbot')"&gt; Buy a ClickBot &lt;/button&gt;
                     &lt;/DropdownItem&gt;
                     &lt;DropdownItem t-foreach="this.clicker.trees" t-as="tree" t-key="tree"&gt;
-                        &lt;t t-out="tree_value.purchased"/&gt;x
+                        &lt;t t-out="tree_value.purchased()"/&gt;x
                         &lt;t t-out="tree"/&gt;
                     &lt;/DropdownItem&gt;
                     &lt;DropdownItem t-foreach="this.clicker.fruits" t-as="fruit" t-key="fruit"&gt;
-                        &lt;t t-out="fruit_value"/&gt;x
+                        &lt;t t-out="fruit_value()"/&gt;x
                         &lt;t t-out="fruit"/&gt;
                     &lt;/DropdownItem&gt;
                 &lt;/t&gt;
@@ -9407,7 +9254,7 @@ touched it since part 1:
 
 </details>
 
-## 18. Use a Notebook component
+## 17. Use a Notebook component
 
 We now keep track of a lot more information. Let us improve our client interface
 by organizing the information and features in various tabs, with the `Notebook`
@@ -9428,10 +9275,11 @@ component:
 <details>
 <summary>Show solution</summary>
 
-No solution commit exists for this step on its own upstream (it lands
-together with a later one) - here's what it changes: the "Bots"/"Power
-multiplier" content and the "Trees"/"Fruits" content each move into their own
-`<Notebook>` tab, replacing the two `<div t-if="...level >= N">` sections.
+The "Bots"/"Power multiplier" content and the "Trees"/"Fruits" content each
+move into their own `<Notebook>` tab. The outer `<div t-if="...level() >= N">`
+wrapper around each group is replaced by `isVisible` on its `<t t-set-slot>` -
+the "Power multiplier" div keeps its own `t-if` though, since `level() >= 3`
+is a finer condition than the "clicks" tab's own `level() >= 1`.
 
 **static/src/client_action/client_action.js**, one more import:
 
@@ -9445,38 +9293,51 @@ and `Notebook` added to `static components`.
 
 ```xml
 <Notebook>
-    <t t-set-slot="clicks" title="'Clicks'" isVisible="this.clicker.level >= 1">
-        <!-- the "Bots" and "Power multiplier" sections from parts 11-12, unchanged -->
+    <t t-set-slot="clicks" title="'Clicks'" isVisible="this.clicker.level() >= 1">
+        <div class="ms-1 mt-1">
+            <!-- the "Bots" section, unchanged -->
+        </div>
+        <div t-if="this.clicker.level() >= 3" class="ms-1 mt-1">
+            <!-- the "Power multiplier" section, unchanged -->
+        </div>
     </t>
-    <t t-set-slot="trees" title="'Trees and Fruits'" isVisible="this.clicker.level >=4">
-        <!-- the "Trees" and "Fruits" sections from part 16, unchanged -->
+    <t t-set-slot="trees" title="'Trees and Fruits'" isVisible="this.clicker.level() >= 4">
+        <div class="ms-1 mt-1">
+            <!-- the "Trees" and "Fruits" sections, unchanged -->
+        </div>
     </t>
 </Notebook>
 ```
 
-Each `<div t-if="...">` wrapper becomes a `<t t-set-slot="...">` on
-`Notebook`, `isVisible` taking over the visibility check the `t-if` used to
-do - the content inside is untouched.
-
 </details>
 
-## 19. Persist the game state
+## 18. Persist the game state
 
 You certainly noticed a big flaw in our game: it is transient. The game state is
-lost each time the user closes the browser tab. Let us fix that. We will use the
-local storage to persist the state.
+lost each time the user closes the browser tab. Let us fix that, with a
+`ClickerStoragePlugin` wrapping `localStorage` - another plugin `ClickerPlugin`
+depends on for one of its edges, same as `EffectPlugin`/`ActionPlugin`. Since
+it's specific to the clicker's own state shape, the serializing and loading
+logic itself belongs there too, not in `ClickerPlugin`.
 
-1. Import `browser` from `@web/core/browser/browser` to access the localstorage.
-2. Serialize the state every 10s (in the same interval code) and store it on the
-   local storage.
-3. When the clicker service is started, it should load the state from the local
-   storage (if any), or initialize itself otherwise.
+1. Create a `ClickerStoragePlugin` with `save(clicker)`/`load(clicker)`
+   methods, reading and writing `window.localStorage` as JSON.
+2. In `ClickerPlugin`, call `save()` from a `useEffect` that reads the state -
+   that way it re-runs and saves on every single change, not just on a timer.
+3. When `ClickerPlugin` starts, it should `load()` the state from storage (if
+   any), or keep its own defaults otherwise.
 
 <details>
 <summary>Show solution</summary>
 
-**static/src/clicker_model.js**, serializing to and rebuilding from plain JSON
-(the `bus` - an `EventBus`, not plain data - is dropped before serializing):
+**static/src/clicker_storage_plugin.js**: since the state is spread across
+several signals (some of them nested, like each bot's own `purchased`),
+serializing means reading every signal into a plain object, and loading means
+setting each one back - there's no single `Object.assign` shortcut like there
+would be for plain properties. `bots` and `trees` share the same shape (a
+`purchased` signal per entry), `fruits` is a flat dict of signals - two small
+helpers per shape avoid writing the same `Object.entries`/`Object.fromEntries`
+dance three times.
 
 <div class="diff-cols">
 <div class="before">
@@ -9488,82 +9349,140 @@ local storage to persist the state.
 <div class="after">
 <h4>After</h4>
 
-<pre><code class="language-javascript">toJSON() {
-    const json = Object.assign({}, this);
-    delete json["bus"];
-    return json;
+<pre><code class="language-javascript">import { Plugin } from "@odoo/owl";
+import { services } from "@web/core/services";
+
+const STORAGE_KEY = "clickerState";
+
+function dumpPurchased(dict) {
+    return Object.fromEntries(Object.entries(dict).map(([name, v]) => [name, v.purchased()]));
 }
 
-static fromJSON(json) {
-    const clicker = new ClickerModel();
-    const clickerInstance = Object.assign(clicker, json);
-    return clickerInstance;
-}</code></pre>
+function loadPurchased(dict, saved) {
+    for (const [name, purchased] of Object.entries(saved)) {
+        dict[name].purchased.set(purchased);
+    }
+}
+
+function dumpSignals(dict) {
+    return Object.fromEntries(Object.entries(dict).map(([name, s]) => [name, s()]));
+}
+
+function loadSignals(dict, saved) {
+    for (const [name, value] of Object.entries(saved)) {
+        dict[name].set(value);
+    }
+}
+
+export class ClickerStoragePlugin extends Plugin {
+    save(clicker) {
+        const json = {
+            clicks: clicker.clicks(),
+            level: clicker.level(),
+            multiplier: clicker.multiplier(),
+            bots: dumpPurchased(clicker.bots),
+            trees: dumpPurchased(clicker.trees),
+            fruits: dumpSignals(clicker.fruits),
+        };
+        window.localStorage.setItem(STORAGE_KEY, JSON.stringify(json));
+    }
+
+    load(clicker) {
+        const value = window.localStorage.getItem(STORAGE_KEY);
+        if (!value) {
+            return;
+        }
+        const saved = JSON.parse(value);
+        clicker.clicks.set(saved.clicks);
+        clicker.level.set(saved.level);
+        clicker.multiplier.set(saved.multiplier);
+        loadPurchased(clicker.bots, saved.bots);
+        loadPurchased(clicker.trees, saved.trees);
+        loadSignals(clicker.fruits, saved.fruits);
+    }
+}
+
+services.add(ClickerStoragePlugin);</code></pre>
 
 </div>
 </div>
 
-**static/src/clicker_service.js**
+`save`/`load` take the clicker instance as an argument, rather than
+`ClickerStoragePlugin` reaching for `ClickerPlugin` itself with `usePlugin` -
+that would be circular, since `ClickerPlugin` already depends on
+`ClickerStoragePlugin`.
+
+**static/src/clicker_plugin.js**
 
 <div class="diff-cols">
 <div class="before">
 <h4>Before</h4>
 
-<pre><code class="language-javascript">import { registry } from "@web/core/registry";
-import { ClickerModel } from "./clicker_model";
-
-const clickerService = {
-    dependencies: ["action", "effect", "notification"],
-    start(env, services) {
-        const model = new ClickerModel();
-
-        document.addEventListener("click", () => model.addClick(), true);
-        setInterval(() => {
-            model.tick();
-        }, 10000);
-
-        // ...the MILESTONE/REWARD listeners from parts 10 and 14, unchanged
-        return model;
-    },
-};</code></pre>
+<pre><code class="language-javascript">effect = usePlugin(EffectPlugin);
+action = usePlugin(ActionPlugin);
+notification = usePlugin(NotificationPlugin);</code></pre>
 
 </div>
 <div class="after">
 <h4>After</h4>
 
-<pre><code class="language-javascript">import { registry } from "@web/core/registry";
-import { ClickerModel } from "./clicker_model";
-import { browser } from "@web/core/browser/browser";
-
-const clickerService = {
-    dependencies: ["action", "effect", "notification"],
-    start(env, services) {
-        const localState = JSON.parse(browser.localStorage.getItem("clickerState"));
-        const model = localState ? ClickerModel.fromJSON(localState) : new ClickerModel();
-
-        document.addEventListener("click", () => model.addClick(), true);
-        setInterval(() => {
-            model.tick();
-        }, 10000);
-
-        setInterval(() => {
-            browser.localStorage.setItem("clickerState", JSON.stringify(model));
-        }, 10000);
-
-        // ...the MILESTONE/REWARD listeners from parts 10 and 14, unchanged
-        return model;
-    },
-};</code></pre>
+<pre><code class="language-javascript">effect = usePlugin(EffectPlugin);
+action = usePlugin(ActionPlugin);
+notification = usePlugin(NotificationPlugin);
+storage = usePlugin(ClickerStoragePlugin);</code></pre>
 
 </div>
 </div>
 
-`browser` (from `@web/core/browser/browser`) is a testable wrapper around
-`window`.
+<div class="diff-cols">
+<div class="before">
+<h4>Before</h4>
+
+<pre><code class="language-javascript">setup() {
+    useListener(document.body, "click", () => this.increment(1), { capture: true });
+    useEffect(() => {
+        const interval = setInterval(() => this._tick(), 10000);
+        return () => clearInterval(interval);
+    });
+    useEffect(() => {
+        const interval = setInterval(() => this._tickFruits(), 30000);
+        return () => clearInterval(interval);
+    });
+}</code></pre>
+
+</div>
+<div class="after">
+<h4>After</h4>
+
+<pre><code class="language-javascript">setup() {
+    this.storage.load(this);
+    useListener(document.body, "click", () => this.increment(1), { capture: true });
+    useEffect(() => this.storage.save(this));
+    useEffect(() => {
+        const interval = setInterval(() => this._tick(), 10000);
+        return () => clearInterval(interval);
+    });
+    useEffect(() => {
+        const interval = setInterval(() => this._tickFruits(), 30000);
+        return () => clearInterval(interval);
+    });
+}</code></pre>
+
+</div>
+</div>
+
+`useEffect(() => this.storage.save(this))` auto-tracks every signal `save()`
+reads (`clicks`, `level`, `multiplier`, every bot/tree's `purchased`, every
+fruit) - it reruns, and re-saves, whenever any one of them changes. `_tick()`
+itself no longer calls `save()` explicitly - its own `clicks.set(...)` already
+triggers the same effect.
+
+(with `import { ClickerStoragePlugin } from "./clicker_storage_plugin";`
+added at the top.)
 
 </details>
 
-## 20. Introduce state migration system
+## 19. Introduce state migration system
 
 Once you persist state somewhere, a new problem arises: what happens when you
 update your code, so the shape of the state changes, and the user opens its
@@ -9577,9 +9496,12 @@ states if it is not up to date.
 1. Add a version number to the state.
 2. Define an (empty) list of migrations. A migration is an object with a
    `fromVersion` number, a `toVersion` number, and a `apply` function.
-3. Whenever the code loads the state from the local storage, it should check the
+3. Whenever `ClickerStoragePlugin` loads the state, it should check the
    version number. If the state is not uptodate, it should apply all necessary
    migrations.
+
+The version number is purely a storage-format concern - it only exists in the
+serialized JSON, `ClickerPlugin` itself never needs to know its own version.
 
 <details>
 <summary>Show solution</summary>
@@ -9615,15 +9537,67 @@ export function migrate(localState) {
 </div>
 </div>
 
-**static/src/clicker_model.js**: `this.version = CURRENT_VERSION;` added to
-the constructor (`import { CURRENT_VERSION } from "./clicker_migration";`).
+**static/src/clicker_storage_plugin.js**: `save()` stamps the current
+version, `load()` migrates before applying:
 
-**static/src/clicker_service.js**: the loaded state is run through `migrate`
-before use: `const localState = migrate(JSON.parse(browser.localStorage.getItem("clickerState")));`
+<div class="diff-cols">
+<div class="before">
+<h4>Before</h4>
+
+<pre><code class="language-javascript">save(clicker) {
+    const json = {
+        clicks: clicker.clicks(),
+        level: clicker.level(),
+        multiplier: clicker.multiplier(),
+        bots: dumpPurchased(clicker.bots),
+        trees: dumpPurchased(clicker.trees),
+        fruits: dumpSignals(clicker.fruits),
+    };
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(json));
+}
+
+load(clicker) {
+    const value = window.localStorage.getItem(STORAGE_KEY);
+    if (!value) {
+        return;
+    }
+    const saved = JSON.parse(value);
+    clicker.clicks.set(saved.clicks);</code></pre>
+
+</div>
+<div class="after">
+<h4>After</h4>
+
+<pre><code class="language-javascript">save(clicker) {
+    const json = {
+        version: CURRENT_VERSION,
+        clicks: clicker.clicks(),
+        level: clicker.level(),
+        multiplier: clicker.multiplier(),
+        bots: dumpPurchased(clicker.bots),
+        trees: dumpPurchased(clicker.trees),
+        fruits: dumpSignals(clicker.fruits),
+    };
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(json));
+}
+
+load(clicker) {
+    const value = window.localStorage.getItem(STORAGE_KEY);
+    if (!value) {
+        return;
+    }
+    const saved = migrate(JSON.parse(value));
+    clicker.clicks.set(saved.clicks);</code></pre>
+
+</div>
+</div>
+
+(with `import { CURRENT_VERSION, migrate } from "./clicker_migration";` added
+at the top.)
 
 </details>
 
-## 21. Add another type of trees
+## 20. Add another type of trees
 
 To test our migration system, let us add a new type of trees: peaches.
 
@@ -9636,11 +9610,15 @@ To test our migration system, let us add a new type of trees: peaches.
 <details>
 <summary>Show solution</summary>
 
-**static/src/clicker_model.js**: a `peachTree` added to `this.trees`
-(1500000 clicks) and `peach: 0` added to `this.fruits`, in the constructor.
+**static/src/clicker_plugin.js**: a `peachTree` added to `trees` (1500000
+clicks) and `peach` added to `fruits` - the client action's `t-foreach`
+already loops over both dicts, so the UI needs no further changes.
 
 **static/src/clicker_migration.js**, bumping the version and migrating
-existing saved state that predates peach trees:
+existing saved state that predates peach trees. The stored shape only ever
+holds each tree/fruit's count (its static price/level/produce lives in
+`ClickerPlugin` itself, not in storage), so the migration only needs to add
+that one number:
 
 <div class="diff-cols">
 <div class="before">
@@ -9672,12 +9650,7 @@ export const migrations = [
         fromVersion: 1.0,
         toVersion: 2.0,
         apply: (state) => {
-            state.trees.peachTree = {
-                price: 1500000,
-                level: 4,
-                produce: "peach",
-                purchased: 0,
-            };
+            state.trees.peachTree = 0;
             state.fruits.peach = 0;
         },
     },
@@ -9699,10 +9672,11 @@ export function migrate(localState) {
 </div>
 </div>
 
-That's the whole game: local component state as a signal, moved to a service
-as a plain reactive object, then a `Reactive`-based model class, an event bus
-for cross-cutting concerns (milestones, rewards), a patched core class, a
-command provider, and state persisted to (and migrated in) local storage.
+That's the whole game: local component state as a signal, moved to a plugin
+shared by every component that needs it, other plugins depended on for its
+own edges (`EffectPlugin`, `ActionPlugin`, `NotificationPlugin`,
+`ClickerStoragePlugin`), a patched core class, a command provider, and state
+persisted to (and migrated in) local storage.
 
 </details>
   </script>

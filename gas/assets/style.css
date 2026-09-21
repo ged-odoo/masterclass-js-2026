@@ -2709,8 +2709,7 @@ html.embedded .sidebar { display: none; }
 
 /* what each Owl deck is about, as five words across */
 #deck-owl .rows.goals,
-#deck-owl-app .rows.goals,
-#deck-views-fields .rows.goals { --box-cols: 5; }
+#deck-owl-app .rows.goals { --box-cols: 5; }
 
 /* the component tree, beside the template that draws it: the tree is the
    slide, the eight lines next to it only have to be readable */
