@@ -1018,12 +1018,11 @@ export class TodoItem extends Component {
       <p class="lead">One dependency tracker underneath, four shapes on top. Pick by the shape of your data.</p>
     </header>
     <div class="slide-body">
-      <ul class="rows table shapes">
-        <li class="head"><span>What you have</span><span>What you use</span><span>What it tracks</span></li>
-        <li><span>A single value</span><span><code>signal(0)</code></span><span>the value</span></li>
-        <li><span>A list you add to</span><span><code>signal.Array([])</code></span><span>its own items, shallow</span></li>
-        <li><span>A flat bag of keys</span><span><code>signal.Object({})</code></span><span>its own keys, shallow</span></li>
-        <li><span>A nested tree of settings</span><span><code>proxy({...})</code></span><span>every level, recursively</span></li>
+      <ul class="rows boxes shapes">
+        <li><h3><code>signal(0)</code></h3><p>A single value.</p><p class="meta">Tracks the value.</p></li>
+        <li><h3><code>signal.Array([])</code></h3><p>A list you add to.</p><p class="meta">Tracks its own items, shallow.</p></li>
+        <li><h3><code>signal.Object({})</code></h3><p>A flat bag of keys.</p><p class="meta">Tracks its own keys, shallow.</p></li>
+        <li><h3><code>proxy({...})</code></h3><p>A nested tree of settings.</p><p class="meta">Tracks every level, recursively.</p></li>
       </ul>
     </div>
     <footer class="slide-foot">
@@ -1385,10 +1384,10 @@ export class ProductCard extends Component {
     </header>
     <div class="slide-body two-col even">
       <section>
-        <h3 class="label file">form.js</h3>
+        <h3 class="label file">some_component.js</h3>
 <pre><code class="language-javascript">import { signal, computed } from "@odoo/owl";
 
-class Form extends Component {
+class SomeComponent extends Component {
     name = signal("");
     email = signal("");
 
@@ -1399,8 +1398,8 @@ class Form extends Component {
 }</code></pre>
       </section>
       <section>
-        <h3 class="label file">form.xml</h3>
-<pre><code class="language-markup">&lt;t t-name="my_module.Form"&gt;
+        <h3 class="label file">some_component.xml</h3>
+<pre><code class="language-markup">&lt;t t-name="my_module.SomeComponent"&gt;
     &lt;input <mark>t-model="this.name"</mark>
            placeholder="Name"/&gt;
     &lt;input t-model="this.email"
@@ -1519,10 +1518,44 @@ class Form extends Component {
   <article class="slide" data-id="50b92cfe">
     <header class="slide-head">
       <p class="eyebrow">Slots</p>
+      <h2>Content the caller writes</h2>
+      <ul class="notes">
+        <li>A <code>Card</code> draws the frame. What goes inside is different at every call site.</li>
+        <li>Props pass <em>data</em> down: a string, a number, a record. They cannot pass a paragraph and a button with a handler on it.</li>
+      </ul>
+    </header>
+    <div class="slide-body two-col even">
+      <section>
+        <h3 class="label file">root.xml — what we want to be able to write</h3>
+<pre><code class="language-markup">&lt;t t-name="tutorial.Root"&gt;
+    &lt;<mark>Card</mark>&gt;
+        &lt;p&gt;Some quick example text.&lt;/p&gt;
+        &lt;a class="btn btn-primary"
+           t-on-click="this.goSomewhere"&gt;
+          Go somewhere
+        &lt;/a&gt;
+    &lt;/Card&gt;
+&lt;/t&gt;</code></pre>
+      </section>
+      <section>
+        <ul class="rows wide-key">
+          <li><span class="key">Markup</span><span>A paragraph, a button, another component — whatever this screen needs.</span></li>
+          <li><span class="key">Its own</span><span><code>this.goSomewhere</code> is the Root's method. The Card never hears about it.</span></li>
+          <li><span class="key">Every call</span><span>The next <code>&lt;Card/&gt;</code> holds something else entirely.</span></li>
+        </ul>
+      </section>
+    </div>
+    <footer class="slide-foot">
+      <p>Owl calls that a slot: the generic component leaves a hole, and whoever uses it fills the hole.</p>
+    </footer>
+  </article>
+
+  <article class="slide" data-id="c47b0e83">
+    <header class="slide-head">
+      <p class="eyebrow">Slots</p>
       <h2>A slot is a hole in a template</h2>
       <ul class="notes">
-        <li>Props pass <em>data</em> down. A slot passes <em>markup</em> down.</li>
-        <li>The generic component says where it goes, with <code>t-call-slot</code>. The caller says what it is.</li>
+        <li>The generic component says <em>where</em> the content goes, with <code>t-call-slot</code>. The caller says what it is.</li>
       </ul>
     </header>
     <div class="slide-body two-col even">
@@ -1537,16 +1570,11 @@ class Form extends Component {
 &lt;/t&gt;</code></pre>
       </section>
       <section>
-        <h3 class="label file">root.xml — where it is used</h3>
-<pre><code class="language-markup">&lt;t t-name="tutorial.Root"&gt;
-    &lt;<mark>Card</mark>&gt;
-        &lt;p&gt;Some quick example text.&lt;/p&gt;
-        &lt;a class="btn btn-primary"
-           t-on-click="this.goSomewhere"&gt;
-          Go somewhere
-        &lt;/a&gt;
-    &lt;/Card&gt;
-&lt;/t&gt;</code></pre>
+        <ul class="rows wide-key">
+          <li><span class="key">default</span><span>Everything the caller wrote between <code>&lt;Card&gt;</code> and <code>&lt;/Card&gt;</code>.</span></li>
+          <li><span class="key">Nothing else</span><span>The Card is seven lines of markup, and no javascript at all.</span></li>
+          <li><span class="key">Reusable</span><span>Every screen that needs a card frame now has one.</span></li>
+        </ul>
       </section>
     </div>
     <footer class="slide-foot">
@@ -2003,17 +2031,13 @@ export class Dashboard extends Component {
       </section>
       <section>
         <h3 class="label file">web/static/src/webclient/webclient.xml</h3>
-<pre><code class="language-markup">&lt;templates xml:space="preserve"&gt;
-
-    &lt;t t-name="<mark>web.WebClient</mark>"&gt;
-        &lt;t t-if="!this.state.fullscreen"&gt;
-            &lt;NavBar/&gt;
-        &lt;/t&gt;
-        &lt;ActionContainer/&gt;
-        &lt;MainComponentsContainer/&gt;
+<pre><code class="language-markup">&lt;t t-name="<mark>web.WebClient</mark>"&gt;
+    &lt;t t-if="!this.state.fullscreen"&gt;
+        &lt;NavBar/&gt;
     &lt;/t&gt;
-
-&lt;/templates&gt;</code></pre>
+    &lt;ActionContainer/&gt;
+    &lt;MainComponentsContainer/&gt;
+&lt;/t&gt;</code></pre>
         <p class="caption">That is the whole thing. Three tags, one of them behind a <code>t-if</code>.</p>
       </section>
     </div>
@@ -2212,10 +2236,45 @@ tiles.<mark>use</mark>({ Component: SalesTile });  // until destroy</code></pre>
     </footer>
   </article>
 
+  <article class="slide" data-id="d6f1a30b">
+    <header class="slide-head">
+      <p class="eyebrow">Client actions</p>
+      <h2>Window actions</h2>
+      <ul class="notes">
+        <li>Far and away the most common one: nearly every menu in Odoo opens an <code>act_window</code>.</li>
+        <li>It names a model and a list of view types. The web client loads those views and renders the first, with a switcher for the rest.</li>
+      </ul>
+    </header>
+    <div class="slide-body two-col even">
+      <section>
+        <h3 class="label file">crm/views/crm_lead_views.xml</h3>
+<pre><code class="language-markup">&lt;record id="crm_lead_action_pipeline"
+        model="<mark>ir.actions.act_window</mark>"&gt;
+    &lt;field name="name"&gt;Pipeline&lt;/field&gt;
+    &lt;field name="<mark>res_model</mark>"&gt;crm.lead&lt;/field&gt;
+    &lt;field name="<mark>view_mode</mark>"&gt;kanban,list,form&lt;/field&gt;
+    &lt;field name="domain"&gt;[("type", "=", "opportunity")]&lt;/field&gt;
+    &lt;field name="context"&gt;{"default_type": "opportunity"}&lt;/field&gt;
+&lt;/record&gt;</code></pre>
+      </section>
+      <section>
+        <ul class="rows wide-key">
+          <li><span class="key">res_model</span><span>The model the views are built on.</span></li>
+          <li><span class="key">view_mode</span><span>Which views, and in what order. The first one opens.</span></li>
+          <li><span class="key">domain</span><span>What is in scope. The user's own filters are added to it, never instead of it.</span></li>
+          <li><span class="key">context</span><span>Defaults for a new record, and anything a view wants to read.</span></li>
+        </ul>
+      </section>
+    </div>
+    <footer class="slide-foot">
+      <p>Nothing here is javascript: it is a record. Your addon writes one when a menu should open a screen it did not have to build.</p>
+    </footer>
+  </article>
+
   <article class="slide" data-id="5f1a8c37">
     <header class="slide-head">
       <p class="eyebrow">Client actions</p>
-      <h2>A screen of your own</h2>
+      <h2>Client Actions</h2>
       <ul class="notes">
         <li>A record in Python names the action; the registry says which component renders it.</li>
         <li><code>Layout</code> gives your screen the control panel every other screen has.</li>
@@ -2224,7 +2283,12 @@ tiles.<mark>use</mark>({ Component: SalesTile });  // until destroy</code></pre>
     <div class="slide-body two-col even">
       <section>
         <h3 class="label file">dashboard.js, and the action record</h3>
-<pre><code class="language-javascript">registry.category("actions")
+<pre><code class="language-javascript">class Dashboard extends Component {
+    static template = "awesome_dashboard.Dashboard";
+    // ...
+}
+
+registry.category("actions")
     .add(<mark>"awesome_dashboard.dashboard"</mark>, Dashboard);</code></pre>
 <pre><code class="language-markup">&lt;record id="dashboard" model="<mark>ir.actions.client</mark>"&gt;
     &lt;field name="name"&gt;Dashboard&lt;/field&gt;

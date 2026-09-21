@@ -2708,8 +2708,12 @@ body:has(dialog.source-dialog[open]) { overflow: hidden; }
 /* the syntax table: the directive, what it does, the example takes the rest */
 #deck-owl .rows.syntax { --cols: 17cqw 16cqw 1fr; }
 
-/* the four shapes of reactive data: three even columns */
-#deck-owl-app .rows.shapes { --cols: 1fr 1fr 1fr; }
+/* the four shapes of reactive data, as four cards on a 2x2: the constructor
+   leads each one, because the constructor is what you go looking for when
+   you are picking between them */
+#deck-owl-app .rows.shapes { --box-cols: 2; }
+
+#deck-owl-app .rows.shapes h3 code { font-size: 0.9em; }
 
 @media (max-width: 720px) {
   body { flex-direction: column; }
