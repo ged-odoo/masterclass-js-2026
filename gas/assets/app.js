@@ -428,18 +428,19 @@ function starfield(count) {
   return `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
 }
 
-// a project without a cover of its own has neither of these
-const welcomeBg = document.querySelector(".welcome-bg");
-const welcomeStars = document.querySelector(".welcome-stars");
-
-if (WELCOME_IMAGE && welcomeBg) {
-  // the cover already has its own stars, keep only the ring and the sparkles
-  welcomeBg.style.backgroundImage = `url("${WELCOME_IMAGE}")`;
-  welcomeBg.style.backgroundSize = "cover";
-  welcomeBg.style.backgroundPosition = "center";
-  welcomeStars?.remove();
-} else if (welcomeStars) {
-  welcomeStars.style.backgroundImage = starfield(220);
+// a project without a cover of its own has none of these, and a deck can have
+// more than one - a closing slide in the cover's layout gets the same treatment
+for (const welcomeBg of document.querySelectorAll(".welcome-bg")) {
+  const welcomeStars = welcomeBg.parentElement.querySelector(".welcome-stars");
+  if (WELCOME_IMAGE) {
+    // the cover already has its own stars, keep only the ring and the sparkles
+    welcomeBg.style.backgroundImage = `url("${WELCOME_IMAGE}")`;
+    welcomeBg.style.backgroundSize = "cover";
+    welcomeBg.style.backgroundPosition = "center";
+    welcomeStars?.remove();
+  } else if (welcomeStars) {
+    welcomeStars.style.backgroundImage = starfield(220);
+  }
 }
 
 // ---------- slide decks ----------

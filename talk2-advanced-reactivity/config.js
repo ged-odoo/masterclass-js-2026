@@ -28,10 +28,10 @@ window.GAS_CONFIG = {
             { id: "primer", title: "A primer on Owl 3", at: "0:00", mins: 3 },
             { id: "question", title: "Reactivity", at: "0:03", mins: 5 },
             { id: "graph", title: "The Computation Graph", at: "0:08", mins: 8 },
-            { id: "gate", title: "Laziness, and the gate", at: "0:16", mins: 7 },
-            { id: "effects", title: "Effects", at: "0:23", mins: 8 },
-            { id: "sin", title: "The cardinal sin", at: "0:31", mins: 10 },
-            { id: "rules", title: "Rules, and close", at: "0:41", mins: 4 },
+            { id: "gate", title: "Fast, by doing nothing", at: "0:16", mins: 7 },
+            { id: "effects", title: "Miscellaneous", at: "0:23", mins: 8 },
+            { id: "tips", title: "Practical Tips", at: "0:31", mins: 14 },
+            { id: "close", title: "Conclusion", at: "0:45" },
             // not an act of the talk: slides held back for questions, kept
             // out of the numbering and off the progress rail
             { id: "appendix", title: "Appendix", counted: false },

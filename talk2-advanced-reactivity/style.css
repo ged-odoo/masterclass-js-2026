@@ -84,6 +84,14 @@
   background: var(--accent-soft);
 }
 
+/* a pair that is a mistake and its fix: the mistake stays a plain card,
+   the fix takes a green tint, mixed into the card so it holds in the dark
+   theme. No palette has a green. */
+#deck-talk .box-pair li.do {
+  border-color: color-mix(in srgb, #3fa45b 50%, var(--border));
+  background: color-mix(in srgb, #3fa45b 11%, var(--card));
+}
+
 /* a box that carries a code sample is the panel: the sample drops its own
    background so there is one frame, not two */
 #deck-talk .box-pair pre {
@@ -111,6 +119,151 @@
 }
 
 /* ---------- the cover ---------- */
+
+/* the three computations, as talk 1 draws them: three columns, each a
+   numeral, a name, what it does and an example of it. The columns share
+   their rows, so the three examples start on one line whatever the text
+   above them runs to - and the whole grid sits in the middle of the body */
+#deck-talk .shape-grid.three {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-auto-rows: auto;
+  align-content: center;
+  gap: 0.6cqw 3.2cqw;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+#deck-talk .shape-grid.three li {
+  position: relative;
+  display: grid;
+  grid-row: span 4;
+  grid-template-rows: subgrid;
+  row-gap: 0.6cqw;
+}
+
+/* a hairline down the middle of each gap, rather than a border on the
+   column, so the three code panels keep the same width */
+#deck-talk .shape-grid.three li + li::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -1.6cqw;
+  border-left: 1px solid var(--line);
+}
+
+#deck-talk .shape-grid.three .code-block {
+  min-width: 0;
+  margin-top: 1.2cqw;
+}
+
+#deck-talk .shape-grid.three .num {
+  color: var(--accent);
+  font-size: max(9px, calc(1.15cqw * var(--content-scale, 1)));
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  font-variant-numeric: tabular-nums;
+}
+
+#deck-talk .shape-grid.three h3 {
+  margin: 0;
+  font-family: inherit;
+  font-size: max(11px, calc(1.5cqw * var(--content-scale, 1)));
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  text-transform: none;
+  color: var(--ink);
+}
+
+#deck-talk .shape-grid.three p {
+  margin: 0;
+  color: var(--quiet);
+  font-size: max(10px, calc(1.3cqw * var(--content-scale, 1)));
+}
+
+/* the three kinds of computation: what it is, whether it runs on its own,
+   and when */
+#deck-talk .rows.kinds { --cols: 24cqw 16cqw 1fr; }
+
+/* Panels as tall as their code, not as tall as the slide. The default is
+   the other way round, so a code panel and the notes beside it end on the
+   same line - but two short samples side by side just leave a lot of empty
+   box under the last line. */
+#deck-talk .slide-body.two-col.fit { align-items: start; }
+
+#deck-talk .slide-body.two-col.fit > section > .code-block,
+#deck-talk .slide-body.two-col.fit > section > .code-block > pre {
+  flex: 0 0 auto;
+}
+
+/* one code panel on its own: a column's width, held in the middle of the
+   slide rather than against its left edge */
+#deck-talk .slide-body.solo > section {
+  align-self: center;
+  width: 48%;
+}
+
+/* a word underlined in a title, for the one the slide turns on: in the
+   accent, one unbroken stroke under the handwriting - skipping the
+   descenders cut "signal" in two */
+#deck-talk .slide h2 u {
+  text-decoration-color: var(--accent);
+  text-decoration-thickness: 0.06em;
+  text-underline-offset: 0.16em;
+  text-decoration-skip-ink: none;
+}
+
+/* the pad's QR code on the cover: under the right half of the title, clear
+   of the title, of the lead beside it and of the ufo */
+#deck-talk .slide .qr {
+  position: absolute;
+  left: 57%;
+  top: 71%;
+  width: 20%;
+  height: auto;
+  transform: translate(-50%, -50%);
+  border: 1px solid var(--line);
+  border-radius: 0.8cqw;
+}
+
+/* the pad again at the close, on the conclusion and the questions: the
+   code with its address under it, on the right where both slides leave
+   room. The block is its own container, so the address is sized off a
+   share of the slide's width - the same on the divider as on the
+   questions, whatever padding each has. Its own gap is still in the
+   slide's units; what is inside it is in the block's */
+#deck-talk .slide:has(> .qr-block) { position: relative; }
+
+#deck-talk .qr-block {
+  position: absolute;
+  left: 78%;
+  top: 60%;
+  width: 30%;
+  transform: translate(-50%, -50%);
+  container-type: inline-size;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.2cqw;
+}
+
+#deck-talk .qr-block img {
+  width: 66.7%;
+  height: auto;
+  border: 1px solid var(--line);
+  border-radius: 2.7cqw;
+}
+
+#deck-talk .qr-block a {
+  color: inherit;
+  text-decoration: none;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: max(11px, 3.4cqw);
+  white-space: nowrap;
+}
 
 /* The cover is the masterclass welcome screen, unchanged: the webp background,
    the sticker art placed as the template places it, and the Odoo Experience

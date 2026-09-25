@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<templates xml:space="preserve">
-    <t t-name="awesome_shelter.NameGeneratorField">
-        <button t-if="this.shouldShowButton" class="btn btn-secondary" t-on-click="this.generate">Generate</button>
-        <t t-else="" t-call="web.CharField"/>
-    </t>
-</templates>

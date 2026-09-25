@@ -148,6 +148,7 @@
       <h2>Introducing<br>Owl 3</h2>
       <p class="lead">RD Framework JS - Géry Debongnie</p>
     </div>
+    <img class="qr" src="assets/qr-code.png" alt="QR code linking to pad.odoo.com/p/rd-oxp26-owl3">
   </article>
 
   <!-- ======================= ACT 1 · THE FRONTIER ======================= -->
@@ -234,11 +235,27 @@
       <p class="lead">The places where a codebase this size started to press against the framework.</p>
     </header>
     <div class="slide-body">
-      <ul class="rows numbered">
-        <li><span class="num">1</span><h3>Reactivity that is subtle to get right</h3><p>Simple on the surface; hard-to-diagnose bugs underneath, as workflows got more complex.</p></li>
-        <li><span class="num">2</span><h3>Hard to write fast derived state</h3><p>Caches, getters, <code>onWillRender</code> precomputes — <em>"sadly, they usually do not compose well"</em>.</p></li>
-        <li><span class="num">3</span><h3>No typing or autocompletion</h3><p>For props and for <code>env</code>. Hence years of hand-written and generated <code>.d.ts</code> files.</p></li>
-        <li><span class="num">4</span><h3>No guidance on how to build an app</h3><p><em>"It is nice not to be constrained, but it makes it more difficult to understand other parts of the codebase."</em></p></li>
+      <ul class="rows boxes challenges">
+        <li>
+          <span class="num">1</span>
+          <h3>Reactivity that is subtle to get right</h3>
+          <p>Simple on the surface; hard-to-diagnose bugs underneath, as workflows got more complex.</p>
+        </li>
+        <li>
+          <span class="num">2</span>
+          <h3>Hard to write fast derived state</h3>
+          <p>Caches, getters, <code>onWillRender</code> precomputes — <em>"sadly, they usually do not compose well"</em>.</p>
+        </li>
+        <li>
+          <span class="num">3</span>
+          <h3>No typing or autocompletion</h3>
+          <p>For props and for <code>env</code>. Hence years of hand-written and generated <code>.d.ts</code> files.</p>
+        </li>
+        <li>
+          <span class="num">4</span>
+          <h3>No guidance on how to build an app</h3>
+          <p><em>"It is nice not to be constrained, but it makes it more difficult to understand other parts of the codebase."</em></p>
+        </li>
       </ul>
     </div>
   </article>
@@ -250,7 +267,7 @@
     </header>
     <div class="slide-body two-col even">
       <section>
-        <ul class="notes">
+        <ul class="notes large">
           <li>Describing state</li>
           <li>Deriving one value from another</li>
           <li>Recomputing efficiently</li>
@@ -326,6 +343,127 @@
     </div>
   </article>
 
+  <article class="slide" data-id="a1f00004" data-act="frontier">
+    <header class="slide-head">
+      <h2>Getting the balance right</h2>
+      <ul class="notes">
+        <li><strong>Not enough power</strong> → every team invents its own solution, and none of them compose.</li>
+        <li><strong>Too much power</strong> → code spends its life working around the framework.</li>
+      </ul>
+    </header>
+    <div class="slide-body">
+      <figure class="figure">
+        <svg viewBox="0 0 1000 250" role="img"
+             aria-label="A dial running from too little power on the left to too opinionated on the right, with a balance point in the middle. Owl 2 sits slightly left of it; Owl 3 aims at it.">
+          <defs>
+            <marker id="dial-ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0 0 L10 5 L0 10 Z"/>
+            </marker>
+          </defs>
+
+          <path class="axis" d="M40 120 H960"/>
+          <path class="tick" d="M40 108 V132 M960 108 V132"/>
+
+          <text class="t l" x="40" y="60">Not enough power</text>
+          <text class="s l" x="40" y="84">you invent the missing piece,</text>
+          <text class="s l" x="40" y="102">over and over, differently each time</text>
+
+          <text class="t r" x="960" y="60">Too much power</text>
+          <text class="s r" x="960" y="84">you fight the framework</text>
+          <text class="s r" x="960" y="102">to do anything it did not foresee</text>
+
+          <rect class="chip" x="420" y="96" width="180" height="48" rx="6"/>
+          <text class="s" x="510" y="126">the balance point</text>
+
+          <path class="ar" marker-end="url(#dial-ar)" d="M392 196 V150"/>
+          <text class="t" x="392" y="222">Owl 2</text>
+          <text class="s" x="392" y="242">slightly low</text>
+
+          <path class="ar js" marker-end="url(#dial-ar)" d="M540 196 V150"/>
+          <text class="t" x="540" y="222">Owl 3</text>
+          <text class="s" x="540" y="242">aiming here</text>
+        </svg>
+      </figure>
+    </div>
+  </article>
+
+  <article class="slide" data-id="a1f00007" data-act="frontier">
+    <header class="slide-head">
+      <p class="eyebrow">Example</p>
+      <h2>Computing a derived value</h2>
+      <ul class="notes">
+        <li>An expensive value, precomputed once per render, cached by hand.</li>
+        <li>It works. It is also three moving parts held together by convention.</li>
+      </ul>
+    </header>
+    <div class="slide-body two-col even">
+      <section>
+        <h3 class="label file">Owl 2</h3>
+<pre><code class="language-javascript">class Dashboard extends Component {
+    setup() {
+        this.state = useState({ total: 0 });
+
+        <mark>onWillRender</mark>(() =&gt; {
+            const key = this.props.orders.length;
+            if (key !== this._key) {
+                this._key = key;
+                const total = expensive(this.props.orders);
+                this.state.total = total;
+            }
+        });
+    }
+}</code></pre>
+      </section>
+      <section>
+        <ul class="rows wide-key">
+          <li><span class="key">Three parts</span><span>A hook, a hand-rolled cache key kept in a private field, and a piece of state to write into.</span></li>
+          <li><span class="key">The rule</span><span>The cache key assumes <em>total</em> depends only on the number of orders, as if the orders themselves never changed. That assumption lives in your head, not in the code.</span></li>
+          <li><span class="key">And then</span><span>Another addon patches <code>expensive</code>, or adds a second input. The cache key is now wrong, silently.</span></li>
+        </ul>
+      </section>
+    </div>
+  </article>
+
+  <article class="slide" data-id="a1f00013" data-act="frontier">
+    <header class="slide-head">
+      <p class="eyebrow">Derived values</p>
+      <h2>computed values</h2>
+      <ul class="notes">
+        <li>The same expensive value, with the same caching, in one declaration.</li>
+      </ul>
+    </header>
+    <div class="slide-body two-col even">
+      <section>
+        <h3 class="label file">Owl 2 — three moving parts</h3>
+<pre><code class="language-javascript">setup() {
+    this.state = useState({ total: 0 });
+
+    onWillRender(() =&gt; {
+        const key = this.props.orders.length;
+        if (key !== this._key) {
+            this._key = key;
+            const total = expensive(this.props.orders);
+            this.state.total = total;
+        }
+    });
+}</code></pre>
+      </section>
+      <section>
+        <h3 class="label file">Owl 3 — one</h3>
+<pre><code class="language-javascript">total = <mark>computed</mark>(() =&gt;
+    expensive(this.props.orders)
+);</code></pre>
+        <ul class="rows wide-key">
+          <li><span class="key">Cached</span><span>It does not recompute unless something it read changed.</span></li>
+          <li><span class="key">Declared</span><span>The dependency is now <em>written down</em>. The runtime can see it.</span></li>
+        </ul>
+      </section>
+    </div>
+    <footer class="slide-foot">
+      <p>The trigger moved: Owl 2 recomputed because a component was about to render, Owl 3 because the state it read changed.</p>
+    </footer>
+  </article>
+
 
 
   <article class="slide" data-id="a1f0004c" data-act="frontier">
@@ -388,50 +526,6 @@
     </footer>
   </article>
 
-  <article class="slide" data-id="a1f00004" data-act="frontier">
-    <header class="slide-head">
-      <h2>Getting the balance right</h2>
-      <ul class="notes">
-        <li><strong>Not enough power</strong> → every team invents its own solution, and none of them compose.</li>
-        <li><strong>Too much power</strong> → code spends its life working around the framework.</li>
-      </ul>
-    </header>
-    <div class="slide-body">
-      <figure class="figure">
-        <svg viewBox="0 0 1000 250" role="img"
-             aria-label="A dial running from too little power on the left to too opinionated on the right, with a balance point in the middle. Owl 2 sits slightly left of it; Owl 3 aims at it.">
-          <defs>
-            <marker id="dial-ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-              <path d="M0 0 L10 5 L0 10 Z"/>
-            </marker>
-          </defs>
-
-          <path class="axis" d="M40 120 H960"/>
-          <path class="tick" d="M40 108 V132 M960 108 V132"/>
-
-          <text class="t l" x="40" y="60">Not enough power</text>
-          <text class="s l" x="40" y="84">you invent the missing piece,</text>
-          <text class="s l" x="40" y="102">over and over, differently each time</text>
-
-          <text class="t r" x="960" y="60">Too much power</text>
-          <text class="s r" x="960" y="84">you fight the framework</text>
-          <text class="s r" x="960" y="102">to do anything it did not foresee</text>
-
-          <rect class="chip" x="420" y="96" width="180" height="48" rx="6"/>
-          <text class="s" x="510" y="126">the balance point</text>
-
-          <path class="ar" marker-end="url(#dial-ar)" d="M392 196 V150"/>
-          <text class="t" x="392" y="222">Owl 2</text>
-          <text class="s" x="392" y="242">slightly low</text>
-
-          <path class="ar js" marker-end="url(#dial-ar)" d="M540 196 V150"/>
-          <text class="t" x="540" y="222">Owl 3</text>
-          <text class="s" x="540" y="242">aiming here</text>
-        </svg>
-      </figure>
-    </div>
-  </article>
-
 
 
 
@@ -446,60 +540,14 @@
     </div>
   </article>
 
-  <article class="slide" data-id="a1f00007" data-act="signals">
-    <header class="slide-head">
-      <p class="eyebrow">Example</p>
-      <h2>Computing a derived value</h2>
-      <ul class="notes">
-        <li>An expensive value, precomputed once per render, cached by hand.</li>
-        <li>It works. It is also four moving parts held together by convention.</li>
-      </ul>
-    </header>
-    <div class="slide-body two-col even">
-      <section>
-        <h3 class="label file">Owl 2</h3>
-<pre><code class="language-javascript">class Dashboard extends Component {
-    setup() {
-        this.state = useState({ total: 0 });
-
-        <mark>onWillRender</mark>(() =&gt; {
-            const key = this.props.orders.length;
-            if (key !== this._key) {
-                this._key = key;
-                this._total = expensive(this.props.orders);
-            }
-            this.state.total = this._total;
-        });
-    }
-}</code></pre>
-      </section>
-      <section>
-        <ul class="rows wide-key">
-          <li><span class="key">Four parts</span><span>A hook, a hand-rolled cache key, a private field, and a piece of state to write into.</span></li>
-          <li><span class="key">The rule</span><span>Nothing in the code says <em>total depends on orders</em>. That fact lives in your head.</span></li>
-          <li><span class="key">And then</span><span>Another addon patches <code>expensive</code>, or adds a second input. The cache key is now wrong, silently.</span></li>
-        </ul>
-      </section>
-    </div>
-  </article>
-
-  <article class="slide statement" data-id="a1f00008" data-act="signals">
-    <header class="slide-head">
-      <h2>The dependency was never written down.</h2>
-      <p class="lead">It lived implicitly, in a set of closures and some unconnected pieces of state. The framework could not see it — so the framework could not help.</p>
-    </header>
-    <footer class="slide-foot">
-      <p><span class="k">Spoiler:</span>Owl 3 lets us make the state explicit, computed values included.</p>
-    </footer>
-  </article>
-
   <article class="slide walkthrough" data-id="a1f00011" data-act="signals">
     <header class="slide-head">
-      <h2>Reactivity: signal</h2>
-      <ul class="notes">
-        <li>A value of its own: call it to read, <code>set</code> it to write.</li>
-        <li>No proxy, no wrapper object, nothing to unwrap.</li>
-      </ul>
+      <h2>It all starts with signals</h2>
+<pre><code class="language-javascript">const s = signal(3);
+
+s();      // read: returns 3
+s.set(4); // write: updates the value to 4
+s();      // returns 4</code></pre>
     </header>
     <div class="slide-body two-col even">
       <section>
@@ -542,80 +590,30 @@ class Counter extends Component {
           <span class="num">1</span>
           <h3>Rendering a component</h3>
           <p>Reads signals, writes DOM. This is the one you already have.</p>
+<pre><code class="language-markup">&lt;t t-out="this.someValue()"/&gt;</code></pre>
         </li>
         <li>
           <span class="num">2</span>
           <h3>A computed value</h3>
           <p>Reads signals, returns a value, and holds on to it until one of them changes.</p>
+<pre><code class="language-javascript">a = signal(3);
+b = signal(5);
+sum = computed(() =&gt;
+    this.a() + this.b()
+);</code></pre>
         </li>
         <li>
           <span class="num">3</span>
           <h3>An effect</h3>
           <p>Reads signals, and changes something outside the graph: the document, storage, a library that knows nothing about this one.</p>
+<pre><code class="language-javascript">useEffect(() =&gt; {
+    console.log(this.a(), this.b());
+});</code></pre>
         </li>
       </ul>
     </div>
     <footer class="slide-foot">
       <p>A render is not a special case. It is a computation that happens to paint.</p>
-    </footer>
-  </article>
-
-  <article class="slide" data-id="a1f00013" data-act="signals">
-    <header class="slide-head">
-      <p class="eyebrow">Derived values</p>
-      <h2>computed</h2>
-      <ul class="notes">
-        <li>The same expensive value, with the same caching, in one declaration.</li>
-      </ul>
-    </header>
-    <div class="slide-body two-col even">
-      <section>
-        <h3 class="label file">Owl 2 — four moving parts</h3>
-<pre><code class="language-javascript">setup() {
-    this.state = useState({ total: 0 });
-
-    onWillRender(() =&gt; {
-        const key = this.props.orders.length;
-        if (key !== this._key) {
-            this._key = key;
-            this._total = expensive(this.props.orders);
-        }
-        this.state.total = this._total;
-    });
-}</code></pre>
-      </section>
-      <section>
-        <h3 class="label file">Owl 3 — one</h3>
-<pre><code class="language-javascript">total = <mark>computed</mark>(() =&gt;
-    expensive(this.props.orders)
-);</code></pre>
-        <ul class="rows wide-key">
-          <li><span class="key">Cached</span><span>It does not recompute unless something it read changed.</span></li>
-          <li><span class="key">Declared</span><span>The dependency is now <em>written down</em>. The runtime can see it.</span></li>
-        </ul>
-      </section>
-    </div>
-    <footer class="slide-foot">
-      <p>The trigger moved: Owl 2 recomputed because a component was about to render, Owl 3 because the state it read changed.</p>
-    </footer>
-  </article>
-
-  <article class="slide" data-id="a1f00014" data-act="signals">
-    <header class="slide-head">
-      <p class="eyebrow">Derived values</p>
-      <h2>computed is fast by construction</h2>
-      <p class="lead">You get the caching you used to hand-roll, and this time it composes.</p>
-    </header>
-    <div class="slide-body">
-      <ul class="rows wide-key">
-        <li><span class="key">Free</span><span>Memoisation comes with the primitive. Nobody writes a cache key, so nobody gets the cache key wrong.</span></li>
-        <li><span class="key">Lazy</span><span>A <code>computed</code> that nothing reads never runs at all.</span></li>
-        <li><span class="key">Gated</span><span>The propagation stops when the <em>value</em> does not change — not merely when the input does.</span></li>
-        <li><span class="key">Composable</span><span>A <code>computed</code> reading another <code>computed</code> just works, and keeps working when another addon patches either one.</span></li>
-      </ul>
-    </div>
-    <footer class="slide-foot">
-      <p>This is soft limit 2, answered. How the graph actually pulls it off is my other talk.</p>
     </footer>
   </article>
 
@@ -650,23 +648,75 @@ class Counter extends Component {
     </footer>
   </article>
 
-
-
-
-
-
-
-
-
-
-  <article class="slide" data-id="a1f00015" data-act="signals">
+  <article class="slide" data-id="a1f0011d" data-act="signals">
     <header class="slide-head">
-      <p class="eyebrow">Effects</p>
-      <h2>A value, or a change to the world</h2>
-      <ul class="notes">
-        <li>Both track what they read, and both re-run when it changes.</li>
-        <li>What differs is what you want out of them.</li>
-      </ul>
+      <p class="eyebrow">Reactivity</p>
+      <h2>Computation graph</h2>
+    </header>
+    <div class="slide-body two-col even fit">
+      <section>
+        <h3 class="label file">some_component.js</h3>
+<pre><code class="language-javascript">class SomeComponent extends Component {
+    static template = "my_module.SomeComponent";
+
+    a = signal(3);
+    b = signal(5);
+    sum = computed(() =&gt; this.a() + this.b());
+
+    setup() {
+        useEffect(() =&gt; {
+            document.title = `a: ${this.a()}`;
+        });
+    }
+}</code></pre>
+        <h3 class="label file">some_component.xml</h3>
+<pre><code class="language-markup">&lt;t t-name="my_module.SomeComponent"&gt;
+    &lt;p&gt;Sum: &lt;t t-out="this.sum()"/&gt;&lt;/p&gt;
+&lt;/t&gt;</code></pre>
+      </section>
+      <section class="graph-side">
+        <figure class="figure deps">
+          <svg viewBox="0 0 600 340" role="img"
+               aria-label="The graph of SomeComponent. The signals a and b sit on top. The computed sum reads both of them, and the effect, which sets the document title, reads a alone. At the bottom, the render reads sum.">
+            <defs>
+              <marker id="deps-ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                <path d="M0 0 L10 5 L0 10 Z"/>
+              </marker>
+            </defs>
+
+            <path class="ar" marker-end="url(#deps-ar)" d="M200 66 V108 H90 V144"/>
+            <path class="ar" marker-end="url(#deps-ar)" d="M200 66 V108 H270 V144"/>
+            <path class="ar" marker-end="url(#deps-ar)" d="M400 66 V108 H330 V144"/>
+            <path class="ar" marker-end="url(#deps-ar)" d="M300 202 V280"/>
+            <rect class="bx js" x="145" y="14" width="110" height="52" rx="26"/>
+            <text class="t" x="200" y="44">a</text>
+            <text class="s" x="200" y="59">signal</text>
+            <rect class="bx js" x="345" y="14" width="110" height="52" rx="26"/>
+            <text class="t" x="400" y="44">b</text>
+            <text class="s" x="400" y="59">signal</text>
+            <rect class="bx" x="15" y="150" width="150" height="52" rx="6"/>
+            <text class="t" x="90" y="180">effect</text>
+            <text class="s" x="90" y="195">useEffect</text>
+            <rect class="bx" x="225" y="150" width="150" height="52" rx="6"/>
+            <text class="t" x="300" y="180">sum</text>
+            <text class="s" x="300" y="195">computed</text>
+            <rect class="bx ui" x="225" y="286" width="150" height="52" rx="6"/>
+            <text class="t" x="300" y="316">render</text>
+            <text class="s" x="300" y="331">the template</text>
+          </svg>
+        </figure>
+      </section>
+    </div>
+    <footer class="slide-foot">
+      <p>Change <code>b</code>, and the effect does not run: it never read <code>b</code>.</p>
+    </footer>
+  </article>
+
+  <article class="slide" data-id="a1f00014" data-act="signals">
+    <header class="slide-head">
+      <p class="eyebrow">Reactivity</p>
+      <h2>computed vs useEffect</h2>
+      <p class="lead">Both track what they read, and both re-run when it changes. What differs is what you want out of them.</p>
     </header>
     <div class="slide-body two-col even">
       <section>
@@ -676,7 +726,12 @@ class Counter extends Component {
         (t) =&gt; !t.completed()
     ).length
 );</code></pre>
-        <p class="caption">Read it like a signal. Never set it. No side effect, ever.</p>
+        <ul class="rows">
+          <li><span class="key">Lazy</span><span>Nothing reads it? It never runs.</span></li>
+          <li><span class="key">Cached</span><span>No cache key to write, or get wrong.</span></li>
+          <li><span class="key">Gated</span><span>An unchanged <em>value</em> stops the propagation.</span></li>
+          <li><span class="key">Composable</span><span>Reads other computeds, survives patches.</span></li>
+        </ul>
       </section>
       <section>
         <h3 class="label file">useEffect — you want a side effect</h3>
@@ -685,46 +740,97 @@ class Counter extends Component {
         "todos", serialize(this.todos()),
     );
 });</code></pre>
-        <p class="caption">Saving, logging, a third-party library. Returns nothing useful.</p>
+        <ul class="rows">
+          <li><span class="key">Outward</span><span>Saving, logging, a third-party library.</span></li>
+          <li><span class="key">Eager</span><span>Its first run finds out what it reads.</span></li>
+          <li><span class="key">Batched</span><span>A burst of writes costs one run.</span></li>
+          <li><span class="key">Disposed</span><span>It goes when the component goes.</span></li>
+        </ul>
       </section>
     </div>
     <footer class="slide-foot">
       <p>When in doubt, start with <code>computed</code>. Reach for an effect when something outside Owl has to change.</p>
+      <p>Soft limit 2, answered.</p>
     </footer>
   </article>
 
   <article class="slide" data-id="a1f00016" data-act="signals">
     <header class="slide-head">
       <p class="eyebrow">Signals</p>
-      <h2>Four kinds of signal, one tracker</h2>
+      <h2>Collection Signals</h2>
       <p class="lead">Pick by the shape of your data, not by taste.</p>
     </header>
     <div class="slide-body">
-      <ul class="shape-grid">
+      <ul class="shape-grid collections">
         <li>
-          <code class="shape">signal(0)</code>
-          <h3>A single value</h3>
-          <p>Tracks the value.</p>
-        </li>
-        <li>
-          <code class="shape">signal.Array([])</code>
+          <code class="shape">const list = signal.Array([1, 2, 3]);</code>
           <h3>A list you add to</h3>
           <p>Tracks its own items, shallow.</p>
         </li>
         <li>
-          <code class="shape">signal.Object({})</code>
+          <code class="shape">const obj = signal.Object({ a: 1 });</code>
           <h3>A flat bag of keys</h3>
           <p>Tracks its own keys, shallow.</p>
         </li>
         <li>
-          <code class="shape">proxy({ ... })</code>
+          <code class="shape">const set = signal.Set(new Set([1, 2]));</code>
+          <h3>Values, each once</h3>
+          <p>Tracks what is in it, shallow.</p>
+        </li>
+        <li>
+          <code class="shape">const map = signal.Map(new Map([["a", 1]]));</code>
+          <h3>Keys to values</h3>
+          <p>Tracks its own entries, shallow.</p>
+        </li>
+        <li class="deep">
+          <code class="shape">const config = proxy({ ui: { theme: "dark" } });</code>
           <h3>A nested tree of settings</h3>
-          <p>Tracks every level, recursively.</p>
+          <p>Not a collection signal: tracks every level, recursively.</p>
         </li>
       </ul>
     </div>
     <footer class="slide-foot">
       <p>The collection signals are <strong>shallow</strong>: what is inside stays plain, and stays untracked. That is the one gotcha.</p>
+    </footer>
+  </article>
+
+  <article class="slide" data-id="a1f00017" data-act="signals">
+    <header class="slide-head">
+      <p class="eyebrow">Signals</p>
+      <h2>Bridging the gap</h2>
+      <ul class="notes">
+        <li><code>t-ref</code> fills a signal: <code>signal.ref()</code> holds the element, and <code>null</code> until the component is mounted. No separate <code>useRef</code>.</li>
+        <li><code>t-model</code> binds a signal to an input, both ways.</li>
+      </ul>
+    </header>
+    <div class="slide-body two-col even">
+      <section>
+        <h3 class="label file">todo_list.js</h3>
+<pre><code class="language-javascript">import { signal, computed, useEffect } from "@odoo/owl";
+
+export class TodoList extends Component {
+    input = <mark>signal.ref()</mark>;
+    name = signal("");
+
+    greeting = <mark>computed</mark>(() =&gt; `Hello ${this.name()}`);
+
+    setup() {
+        useEffect(() =&gt; this.input()?.focus());
+    }
+}</code></pre>
+      </section>
+      <section>
+        <h3 class="label file">todo_list.xml</h3>
+<pre><code class="language-markup">&lt;input <mark>t-ref="this.input"</mark>
+       placeholder="What needs doing?"/&gt;
+
+&lt;input <mark>t-model="this.name"</mark>/&gt;
+&lt;p t-out="this.greeting()"/&gt;</code></pre>
+        <p class="caption">One concept fewer to hold: refs, model bindings and state are all the same thing - so a <code>computed</code> reads what <code>t-model</code> writes, with nothing in between.</p>
+      </section>
+    </div>
+    <footer class="slide-foot">
+      <p>The state and the DOM, in one graph: what the user types is a signal, and so is the element they type it in.</p>
     </footer>
   </article>
 
@@ -746,7 +852,7 @@ class Counter extends Component {
       <h2>What was wrong with env</h2>
       <p class="lead">The same diagnosis, one level up. <code>env</code> was under-powered, so every team invented a convention on top of it — and none of them composed.</p>
     </header>
-    <div class="slide-body two-col even">
+    <div class="slide-body solo">
       <section>
         <h3 class="label">Owl 2</h3>
 <pre><code class="language-javascript">// one bag, for everything
@@ -760,16 +866,9 @@ this.orm = useService("orm");
 // and state handed down invisibly
 useSubEnv({ myCounter: this.counter });</code></pre>
       </section>
-      <section>
-        <ul class="rows wide-key">
-          <li><span class="key">Untyped</span><span>A string key into a bag. No autocompletion, no rename, no way to find the callers.</span></li>
-          <li><span class="key">Invisible</span><span><code>useSubEnv</code> changed what a subtree saw, from a distance, with nothing at the other end to say so.</span></li>
-          <li><span class="key">Unbounded</span><span>Anything could reach anything. Which meant everything eventually did.</span></li>
-        </ul>
-      </section>
     </div>
     <footer class="slide-foot">
-      <p>This is soft limit 3 and soft limit 4, in one object.</p>
+      <p>Untyped, invisible, unbounded.</p>
     </footer>
   </article>
 
@@ -779,7 +878,6 @@ useSubEnv({ myCounter: this.counter });</code></pre>
       <h2>A plugin is a class</h2>
       <ul class="notes">
         <li>Reactive state, methods, and a lifecycle of its own: <code>setup</code>, then destroy.</li>
-        <li>One instance, shared by everyone who asks for it.</li>
       </ul>
     </header>
     <div class="slide-body two-col even">
@@ -853,44 +951,46 @@ orm.searchRead(/* autocompleted */);</code></pre>
   <article class="slide" data-id="a1f00022" data-act="plugins">
     <header class="slide-head">
       <p class="eyebrow">Plugins</p>
-      <h2>Where a plugin lives</h2>
-      <p class="lead">The class is the same. The line that installs it decides who can reach it, and for how long.</p>
+      <h2>Global and local plugins</h2>
+      <p class="lead">Plugins should be provided with <code>providePlugins</code>.</p>
     </header>
     <div class="slide-body">
       <figure class="figure tree">
-        <svg viewBox="0 0 1000 320" role="img"
-             aria-label="A component tree. The WebClient at the root registers the global plugins with services.add, so anything below can reach them. Under it sit two screens; one of them, a Dashboard, provides a plugin of its own with providePlugins, which only Chart and Table, the components under it, can ask for.">
+        <svg viewBox="0 0 1000 376" role="img"
+             aria-label="A component tree. Each global plugin registers itself with services.add; the WebClient at the root provides them all with providePlugins(services.items()), so anything below can reach them. Under it sit two screens; one of them, a Dashboard, provides a plugin of its own with providePlugins, which only Chart and Table, the components under it, can ask for.">
           <defs>
             <marker id="tree-ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
               <path d="M0 0 L10 5 L0 10 Z"/>
             </marker>
           </defs>
 
-          <path class="ar" marker-end="url(#tree-ar)" d="M330 66 V99 H185 V126"/>
-          <path class="ar" marker-end="url(#tree-ar)" d="M330 66 V99 H475 V126"/>
-          <path class="ar" marker-end="url(#tree-ar)" d="M475 184 V217 H370 V244"/>
-          <path class="ar" marker-end="url(#tree-ar)" d="M475 184 V217 H580 V244"/>
-          <rect class="bx js" x="245" y="14" width="170" height="52" rx="6"/>
-          <text class="t" x="330" y="44">WebClient</text>
-          <text class="s" x="330" y="59">the root</text>
-          <rect class="bx" x="100" y="132" width="170" height="52" rx="6"/>
-          <text class="t" x="185" y="162">Settings</text>
-          <text class="s" x="185" y="177">another screen</text>
-          <rect class="bx js" x="390" y="132" width="170" height="52" rx="6"/>
-          <text class="t" x="475" y="162">Dashboard</text>
-          <text class="s" x="475" y="177">a client action</text>
-          <rect class="bx" x="285" y="250" width="170" height="52" rx="6"/>
-          <text class="t" x="370" y="283">Chart</text>
-          <rect class="bx" x="495" y="250" width="170" height="52" rx="6"/>
-          <text class="t" x="580" y="283">Table</text>
-          <text class="m l" x="690" y="40">services.add(ORM, Dialog, …)</text>
-          <text class="s l" x="690" y="62">the global plugins: one instance per tab,</text>
-          <text class="s l" x="690" y="80">reachable from anywhere below</text>
-          <text class="m l" x="690" y="158">providePlugins([DashboardItems])</text>
-          <text class="s l" x="690" y="180">this screen and everything under it,</text>
-          <text class="s l" x="690" y="198">destroyed with it</text>
-          <text class="m l" x="690" y="276">usePlugin(DashboardItems)</text>
-          <text class="s l" x="690" y="298">the nearest one that provides it</text>
+          <path class="ar" marker-end="url(#tree-ar)" d="M330 122 V155 H185 V182"/>
+          <path class="ar" marker-end="url(#tree-ar)" d="M330 122 V155 H475 V182"/>
+          <path class="ar" marker-end="url(#tree-ar)" d="M475 240 V273 H370 V300"/>
+          <path class="ar" marker-end="url(#tree-ar)" d="M475 240 V273 H580 V300"/>
+          <rect class="bx js" x="245" y="70" width="170" height="52" rx="6"/>
+          <text class="t" x="330" y="100">WebClient</text>
+          <text class="s" x="330" y="115">the root</text>
+          <rect class="bx" x="100" y="188" width="170" height="52" rx="6"/>
+          <text class="t" x="185" y="218">Settings</text>
+          <text class="s" x="185" y="233">another screen</text>
+          <rect class="bx js" x="390" y="188" width="170" height="52" rx="6"/>
+          <text class="t" x="475" y="218">Dashboard</text>
+          <text class="s" x="475" y="233">a client action</text>
+          <rect class="bx" x="285" y="306" width="170" height="52" rx="6"/>
+          <text class="t" x="370" y="339">Chart</text>
+          <rect class="bx" x="495" y="306" width="170" height="52" rx="6"/>
+          <text class="t" x="580" y="339">Table</text>
+          <text class="m l" x="690" y="22">services.add(ORM)</text>
+          <text class="s l" x="690" y="44">each global plugin registers itself</text>
+          <text class="m l" x="690" y="96">providePlugins(services.items())</text>
+          <text class="s l" x="690" y="118">all of them, at the root: one instance per tab,</text>
+          <text class="s l" x="690" y="136">reachable from anywhere below</text>
+          <text class="m l" x="690" y="214">providePlugins([ReportingPlugin])</text>
+          <text class="s l" x="690" y="236">this screen and everything under it,</text>
+          <text class="s l" x="690" y="254">destroyed with it</text>
+          <text class="m l" x="690" y="332">usePlugin(ReportingPlugin)</text>
+          <text class="s l" x="690" y="354">the nearest one that provides it</text>
         </svg>
       </figure>
     </div>
@@ -904,31 +1004,42 @@ orm.searchRead(/* autocompleted */);</code></pre>
       <p class="eyebrow">Plugins</p>
       <h2>Dependencies</h2>
       <ul class="notes">
+        <li>Components can depend on plugins, and plugins can depend on plugins.</li>
         <li>A plugin reaches another by calling <code>usePlugin</code> — in a class field, or in <code>setup</code>.</li>
       </ul>
     </header>
-    <div class="slide-body two-col even">
+    <div class="slide-body two-col even fit">
       <section>
-        <h3 class="label file">statistics_plugin.js</h3>
-<pre><code class="language-javascript">export class StatisticsPlugin extends Plugin {
-    orm = <mark>usePlugin(ORM)</mark>;
+        <h3 class="label file">clipboard_plugin.js</h3>
+<pre><code class="language-javascript">export class ClipboardPlugin extends Plugin {
+    notification = <mark>usePlugin(NotificationPlugin)</mark>;
 
-    stats = signal.Object({});
-
-    setup() {
-        <mark>onWillStart</mark>(async () =&gt; {
-            this.stats.set(await this.orm.call(
-                "res.partner", "get_statistics"));
-        });
+    async copy(text) {
+        await navigator.clipboard.writeText(text);
+        this.notification.add("Copied to the clipboard");
     }
 }</code></pre>
       </section>
-      <section>
-        <ul class="rows wide-key">
-          <li><span class="key">By class</span><span>Not a name in a <code>dependencies</code> array. Rename the file and nothing breaks.</span></li>
-          <li><span class="key">Async</span><span><code>onWillStart</code> in a plugin holds back the first render, so a component can read <code>stats</code> straight away.</span></li>
-          <li><span class="key">Sequence</span><span><code>static sequence = 10</code> for the few that everything else reads. Default 50, lower first.</span></li>
-        </ul>
+      <section class="graph-side">
+        <figure class="figure dep-pair">
+          <svg viewBox="0 0 400 270" role="img"
+               aria-label="Two plugins. ClipboardPlugin, on top, depends on NotificationPlugin, below it: an arrow runs from the first to the second, labelled usePlugin.">
+            <defs>
+              <marker id="dep-ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                <path d="M0 0 L10 5 L0 10 Z"/>
+              </marker>
+            </defs>
+
+            <path class="ar" marker-end="url(#dep-ar)" d="M200 76 V188"/>
+            <text class="m l" x="216" y="137">usePlugin</text>
+            <rect class="bx js" x="80" y="14" width="240" height="62" rx="6"/>
+            <text class="t" x="200" y="45">ClipboardPlugin</text>
+            <text class="s" x="200" y="64">yours</text>
+            <rect class="bx" x="80" y="194" width="240" height="62" rx="6"/>
+            <text class="t" x="200" y="225">NotificationPlugin</text>
+            <text class="s" x="200" y="244">a global plugin, from web</text>
+          </svg>
+        </figure>
       </section>
     </div>
   </article>
@@ -977,7 +1088,6 @@ export class TitlePlugin extends Plugin { /* ... */ }
     <div class="divider-body">
       <p class="divider-eyebrow"></p>
       <h2>Other changes</h2>
-      <p class="divider-sub">The smaller things, and what they each take off your hands.</p>
       <div class="prog"></div>
     </div>
   </article>
@@ -1055,45 +1165,86 @@ export class TitlePlugin extends Plugin { /* ... */ }
     </div>
   </article>
 
-  <article class="slide" data-id="a1f00017" data-act="misc">
+  <article class="slide" data-id="a1f0026e" data-act="misc">
     <header class="slide-head">
       <p class="eyebrow">Other changes</p>
-      <h2>A ref is now a signal too</h2>
+      <h2>assertType and validateType</h2>
       <ul class="notes">
-        <li>No separate <code>useRef</code> concept: <code>signal.ref()</code> is a signal that starts at <code>null</code>.</li>
-        <li><code>t-model</code> takes one as well, and binds it both ways.</li>
+        <li>The validators <code>useProps</code> takes work on any value, not just props.</li>
       </ul>
     </header>
-    <div class="slide-body two-col even">
+    <div class="slide-body two-col even fit">
       <section>
-        <h3 class="label file">todo_list.js</h3>
-<pre><code class="language-javascript">import { signal, computed, useEffect } from "@odoo/owl";
+        <h3 class="label file">validateType — returns the issues</h3>
+<pre><code class="language-javascript">import { t, validateType } from "@odoo/owl";
 
-export class TodoList extends Component {
-    input = <mark>signal.ref()</mark>;
-    name = signal("");
+const userType = t.object({
+    name: t.string(),
+    age: t.number().optional(),
+});
 
-    greeting = <mark>computed</mark>(() =&gt; `Hello ${this.name()}`);
-
-    setup() {
-        useEffect(() =&gt; this.input()?.focus());
-    }
-}</code></pre>
+<mark>validateType</mark>({ name: "Alice" }, userType);
+// []
+<mark>validateType</mark>({ age: 30 }, userType);
+// [{ message: "object value has missing keys" }]</code></pre>
       </section>
       <section>
-        <h3 class="label file">todo_list.xml</h3>
-<pre><code class="language-markup">&lt;input <mark>t-ref="this.input"</mark>
-       placeholder="What needs doing?"/&gt;
+        <h3 class="label file">assertType — throws, so a function can guard its input</h3>
+<pre><code class="language-javascript">import { assertType } from "@odoo/owl";
 
-&lt;input <mark>t-model="this.name"</mark>/&gt;
-&lt;p t-out="this.greeting()"/&gt;</code></pre>
-        <p class="caption">One concept fewer to hold: refs, model bindings and state are all the same thing - so a <code>computed</code> reads what <code>t-model</code> writes, with nothing in between.</p>
+/**
+ * @param {typeof userType.type} user
+ */
+function greet(user) {
+    <mark>assertType</mark>(user, userType, "greet: bad user");
+    return `Hello, ${user.name}`;
+}
+
+greet({ name: "Alice" }); // "Hello, Alice"
+greet({ age: 30 });       // throws an OwlError</code></pre>
       </section>
     </div>
     <footer class="slide-foot">
-      <p>Read it like any other signal — <code>this.input()</code> — and it is <code>null</code> until the component is mounted.</p>
+      <p>One type language, for props and for anything else that crosses a boundary: an RPC result, a config, something from <code>localStorage</code>.</p>
     </footer>
   </article>
+
+  <article class="slide" data-id="a1f0026f" data-act="misc">
+    <header class="slide-head">
+      <p class="eyebrow">Other changes</p>
+      <h2>Resources and Registries</h2>
+    </header>
+    <div class="slide-body two-col even fit">
+      <section>
+        <h3 class="label file">Resource — ordered, no keys</h3>
+<pre><code class="language-javascript">import { <mark>Resource</mark> } from "@odoo/owl";
+
+const systray = new Resource();
+
+systray.add(ClockItem);
+systray.add(SearchItem, { sequence: 10 });
+
+systray.items(); // [SearchItem, ClockItem]</code></pre>
+      </section>
+      <section>
+        <h3 class="label file">Registry — looked up by key</h3>
+<pre><code class="language-javascript">import { <mark>Registry</mark> } from "@odoo/owl";
+
+const views = new Registry();
+
+views.add("list", ListView);
+views.add("form", FormView);
+
+views.get("list");   // ListView
+views.get("kanban"); // throws: not registered
+views.items();       // [ListView, FormView]</code></pre>
+      </section>
+    </div>
+    <footer class="slide-foot">
+      <p>Both are reactive and can validate what goes in, and <code>use()</code> takes an entry out again when its component or plugin goes.</p>
+    </footer>
+  </article>
+
 
 
 
@@ -1101,7 +1252,6 @@ export class TodoList extends Component {
     <header class="slide-head">
       <p class="eyebrow">The change surface</p>
       <h2>Gone, new, and changed</h2>
-      <p class="lead">The same change, as the words you actually type.</p>
     </header>
     <div class="slide-body two-col even three">
       <section>
@@ -1118,6 +1268,7 @@ export class TodoList extends Component {
           <li>this.render</li>
           <li>env</li>
           <li>useSubEnv</li>
+          <li>useChildSubEnv</li>
           <li>services</li>
           <li>t-esc</li>
         </ul>
@@ -1141,6 +1292,8 @@ export class TodoList extends Component {
           <li>useProps</li>
           <li>assertType</li>
           <li>validateType</li>
+          <li>Resource</li>
+          <li>Registry</li>
         </ul>
       </section>
       <section>
@@ -1148,6 +1301,7 @@ export class TodoList extends Component {
         <ul class="chips changed">
           <li>t-slot <span class="to">→</span> t-call-slot</li>
           <li>useExternalListener <span class="to">→</span> useListener</li>
+          <li>t-portal <span class="to">→</span> Portal</li>
           <li>useEffect <span class="note">reads, not a deps array</span></li>
           <li>t-ref <span class="note">a signal, not a name</span></li>
           <li>t-model <span class="note">binds a signal</span></li>
@@ -1223,7 +1377,7 @@ export class TodoList extends Component {
     <div class="divider-body">
       <p class="divider-eyebrow"></p>
       <h2>Migration</h2>
-      <p class="divider-sub">Everyone loves migrating code.</p>
+      <p class="divider-sub">Everyone loves migrating code (I think).</p>
       <div class="prog"></div>
     </div>
   </article>
@@ -1235,50 +1389,69 @@ export class TodoList extends Component {
     </header>
   </article>
 
+  <article class="slide release-notes" data-id="a1f0027d" data-act="transition">
+    <header class="slide-head">
+      <p class="eyebrow">The transition</p>
+      <div class="title-row">
+        <h2>Release notes</h2>
+        <a class="doc-link" href="https://odoo.github.io/owl/documentation/v3/owl/owl3_design.html" target="_blank" rel="noopener">odoo.github.io/owl/documentation/v3/owl/owl3_design.html</a>
+      </div>
+      <p class="lead">It is searchable!! (<code>Ctrl K</code>)</p>
+    </header>
+    <div class="slide-body">
+      <figure class="figure shot">
+        <img src="assets/owl3-release-notes.webp"
+             alt="The Owl 3 release notes in the Owl documentation, under Migration. The section on env being removed, with a collapsible block of compatibility code for keeping env, built on a plugin.">
+      </figure>
+    </div>
+  </article>
+
   <article class="slide" data-id="a1f0027c" data-act="transition">
     <header class="slide-head">
       <p class="eyebrow">The transition</p>
-      <h2>Migration</h2>
-      <p class="lead">You are not doing this by reading diffs.</p>
+      <h2>Scripts</h2>
+      <p class="lead"><code>odoo/upgrade_code/owl3-migration.py</code> (~1k loc), with <code>tools_js_expressions.py</code> (&gt; 2.5k loc)</p>
     </header>
     <div class="slide-body">
-      <ul class="rows titled">
-        <li>
-          <span class="key">Release notes</span>
-          <p>Every breaking change written down, version by version, with what to write instead of it.</p>
-        </li>
-        <li>
-          <span class="key">Migration scripts</span>
-          <p>The mechanical half, run over your addon: the renames, the imports, the template syntax.</p>
-        </li>
-      </ul>
+      <figure class="figure shot">
+        <img src="assets/owl3-upgrade-script.webp"
+             alt="The upgrade script's entry point, in Python: a MigrationCollector running one step after another - useEffect, onWillRender, useEnv, useSubEnv, useRef, useState, reactive, t-esc, t-ref, t-model, this. in templates, t-slot, parametric t-call, useService and more.">
+      </figure>
     </div>
-    <footer class="slide-foot">
-      <p>Which is how the syntax migration got finished. The architecture is the half that is still yours.</p>
-    </footer>
   </article>
 
 
 
 
 
-  <article class="slide" data-id="a1f00032" data-act="transition">
+  <article class="slide" data-id="a1f0032c" data-act="transition">
     <header class="slide-head">
       <p class="eyebrow">The transition</p>
-      <h2>The syntax migration is finished.<br>The architecture migration is a third done.</h2>
-      <p class="lead">Nobody is writing <code>useState</code> any more. Plenty of code still reaches for <code>this.env</code>, and that is the work that remains.</p>
+      <h2>Compatibility Layer</h2>
+      <p class="lead"><code>addons/web/static/src/owl2/*</code> lets Owl 2 code run on Owl 3 (to some extent).</p>
     </header>
-    <div class="slide-body">
-      <ul class="rows wide-key">
-        <li><span class="key">The layer</span><span><code>@web/owl2/*</code> puts <code>this.env</code>, <code>useSubEnv</code>, <code>onWillRender</code> and friends back. <strong>194 files</strong> import it today.</span></li>
-        <li><span class="key">Temporary</span><span>It goes as soon as it can. Code that leans on it goes with it, so do not write new code against it.</span></li>
-        <li><span class="key">Owl itself</span><span><code>3.0.0-alpha.48</code>, in a correctness and hardening phase rather than a feature phase.</span></li>
-        <li><span class="key">Honestly</span><span>Odoo runs on it. That is the strongest statement available, and it is a real one.</span></li>
-      </ul>
+    <div class="slide-body two-col even fit">
+      <section>
+        <h3 class="label file">owl3_compatibility_layer.js, trimmed</h3>
+<pre><code class="language-javascript">class Component extends owl.Component {
+    constructor(node) {
+        super(node);
+        this.props = owl.useProps();
+        this.env = <mark>useEnv()</mark>;
+    }
+}
+owl.Component = Component;
+
+owl.onWillRender = function (cb) { /* ... */ };
+owl.useEnv = useEnv;
+owl.useSubEnv = useSubEnv;</code></pre>
+      </section>
+      <section>
+        <ul class="rows wide-key">
+          <li><span class="key">Puts back</span><span><code>this.env</code>, <code>this.render()</code>, <code>useEnv</code>, <code>useSubEnv</code>, <code>useChildSubEnv</code>, <code>onWillRender</code>, <code>useLayoutEffect</code>, <code>useComponent</code>, <code>useExternalListener</code>, <code>t-portal</code>, …</span></li>
+        </ul>
+      </section>
     </div>
-    <footer class="slide-foot">
-      <p>An alpha that the whole product already runs on is a different animal from an alpha nobody uses.</p>
-    </footer>
   </article>
 
   <article class="slide" data-id="a1f00033" data-act="transition">
@@ -1331,8 +1504,7 @@ export class TodoList extends Component {
   <article class="slide divider" data-id="a1f00035" data-act="vision">
     <div class="divider-body">
       <p class="divider-eyebrow"></p>
-      <h2>Where this goes</h2>
-      <p class="divider-sub">And where to find all of it.</p>
+      <h2>Conclusion</h2>
       <div class="prog"></div>
     </div>
   </article>
@@ -1366,18 +1538,16 @@ export class TodoList extends Component {
     <div class="slide-body">
       <ul class="rows boxes toolkit">
         <li>
-          <h3><code>signal</code> · <code>computed</code> · <code>useEffect</code></h3>
-          <p>Reactivity belongs to the value, not to the container it arrived in, so it survives every boundary. Derived state declares itself: lazy, cached, composing across addons. An effect is a thing you write, not a lifecycle hook you hang code on.</p>
-          <p class="meta">Still coming: <code>asyncComputed</code>, <code>Suspense</code>, cancellation that follows the component that asked for it.</p>
+          <h3>Reactivity</h3>
+          <p><code>signal</code> · <code>computed</code> · <code>useEffect</code></p>
         </li>
         <li>
-          <h3><code>Plugin</code> · <code>usePlugin</code></h3>
-          <p>Shared logic asked for by class, not by a string nobody can follow back to its source. Global, or owned by the screen that opened it — the framework finally has an opinion about where logic lives.</p>
-          <p class="meta">Still coming: Owl stops being one library and becomes a small family — a router, an ORM.</p>
+          <h3>Plugin system</h3>
+          <p><code>Plugin</code> · <code>usePlugin</code> · <code>providePlugins</code></p>
         </li>
         <li>
-          <h3><code>useProps</code> · <code>types</code></h3>
-          <p>Props say their own shape, and a plugin's class is its own type. That is years of hand-written and generated <code>.d.ts</code> files no longer worth writing.</p>
+          <h3>Others</h3>
+          <p><code>useProps</code>, type validation, resources, …</p>
         </li>
       </ul>
     </div>
@@ -1397,6 +1567,33 @@ export class TodoList extends Component {
     </div>
   </article>
 
+
+  <article class="slide welcome" data-id="a1f0038b" data-act="vision">
+    <div class="welcome-bg"></div>
+    <div class="welcome-stars"></div>
+    <div class="welcome-art">
+      <img src="assets/stickers/ring.webp" alt="" style="left: 8.08%; top: 9.69%; width: 5.77%;">
+      <img src="assets/stickers/cross.webp" alt="" style="left: 18.72%; top: 6.9%; width: 3.67%;">
+      <img src="assets/stickers/sparkle.webp" alt="" style="left: 14.83%; top: 16.22%; width: 1.28%;">
+      <img src="assets/stickers/burst.webp" alt="" style="left: 61.14%; top: 5.04%; width: 3.67%;">
+      <img src="assets/stickers/sparkle.webp" alt="" style="left: 66.75%; top: 10.52%; width: 1.28%;">
+      <img src="assets/stickers/ufo.webp" alt="" style="left: 75.86%; top: 53.74%; width: 15.93%;">
+      <img src="assets/stickers/spiral.webp" alt="" style="left: 73.31%; top: 76.09%; width: 9.74%;">
+      <img src="assets/stickers/sparkle.webp" alt="" style="left: 94.27%; top: 69.99%; width: 1.28%;">
+      <img src="assets/stickers/sparkle.webp" alt="" style="left: 5.88%; top: 86.46%; width: 1.28%;">
+      <img src="assets/stickers/burst.webp" alt="" style="left: 8.08%; top: 89.89%; width: 3.67%;">
+    </div>
+
+    <img class="welcome-logo" src="assets/odoo-experience.webp"
+         alt="Odoo Experience 2026">
+
+    <div class="welcome-content">
+      <h2>Thank you!</h2>
+      <p class="lead">RD Framework JS - Géry Debongnie</p>
+    </div>
+    <img class="qr" src="assets/qr-code.png" alt="QR code linking to pad.odoo.com/p/rd-oxp26-owl3">
+    <div class="qr-url"><a href="https://pad.odoo.com/p/rd-oxp26-owl3" target="_blank" rel="noopener">pad.odoo.com/p/rd-oxp26-owl3</a></div>
+  </article>
 
   <article class="slide statement with-owl" data-id="a1f00039" data-act="vision">
     <header class="slide-head">
@@ -1423,6 +1620,8 @@ export class TodoList extends Component {
         </g>
       </svg>
     </div>
+    <img class="qr" src="assets/qr-code.png" alt="QR code linking to pad.odoo.com/p/rd-oxp26-owl3">
+    <div class="qr-url"><a href="https://pad.odoo.com/p/rd-oxp26-owl3" target="_blank" rel="noopener">pad.odoo.com/p/rd-oxp26-owl3</a></div>
     <footer class="slide-foot">
       <p><span class="k">Everything</span><code>odoo.github.io/owl</code></p>
     </footer>
@@ -1537,6 +1736,53 @@ class DarkSection extends Component {
     </div>
     <footer class="slide-foot">
       <p>Counted the week of the talk. Re-run before you quote these.</p>
+    </footer>
+  </article>
+
+  <article class="slide statement" data-id="a1f00008" data-act="appendix">
+    <header class="slide-head">
+      <h2>The dependency was never written down.</h2>
+      <p class="lead">It lived implicitly, in a set of closures and some unconnected pieces of state. The framework could not see it — so the framework could not help.</p>
+    </header>
+    <footer class="slide-foot">
+      <p><span class="k">Spoiler:</span>Owl 3 lets us make the state explicit, computed values included.</p>
+    </footer>
+  </article>
+
+  <article class="slide" data-id="a1f0004e" data-act="appendix">
+    <header class="slide-head">
+      <p class="eyebrow">If it comes up</p>
+      <h2>Asynchronous state</h2>
+      <ul class="notes">
+        <li><code>asyncComputed</code> is to a fetch what <code>computed</code> is to a value: it re-runs when what it read changes.</li>
+      </ul>
+    </header>
+    <div class="slide-body two-col even">
+      <section>
+        <h3 class="label file">user_card.js</h3>
+<pre><code class="language-javascript">userId = signal(1);
+
+user = <mark>asyncComputed</mark>(async ({ abortSignal }) =&gt; {
+    const url = `/api/users/${this.userId()}`;
+    const res = await fetch(url, { signal: abortSignal });
+    return res.json();
+}, { initial: null });
+
+this.user();          // null, then the user
+this.user.loading();  // true while a run is in flight
+this.user.error();    // Error | null
+this.user.refresh();  // run again</code></pre>
+      </section>
+      <section>
+        <ul class="rows wide-key">
+          <li><span class="key">Experimental</span><span>The API is still shaking out: option names, methods, cancellation.</span></li>
+          <li><span class="key">Cancels itself</span><span>A newer run, or the component going away, aborts the one in flight.</span></li>
+          <li><span class="key">Until the first <code>await</code></span><span>Reads after it are not tracked. Fetch in an <code>asyncComputed</code>, derive in a <code>computed</code>.</span></li>
+        </ul>
+      </section>
+    </div>
+    <footer class="slide-foot">
+      <p><span class="k">Maybe, later</span>A query on top of it: cached, shared by the components that ask for the same thing.</p>
     </footer>
   </article>
 

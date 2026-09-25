@@ -62,6 +62,45 @@
   stroke-linecap: round;
 }
 
+/* the QR code, on the cover and on the questions: the same place on both
+   slides, just right of centre - clear of the cover's title and its ufo,
+   clear of the question and its owl */
+#deck-talk .slide .qr {
+  position: absolute;
+  left: 57%;
+  top: 50%;
+  width: 20%;
+  height: auto;
+  transform: translate(-50%, -50%);
+  border: 1px solid var(--line);
+  border-radius: 0.8cqw;
+}
+
+/* the address under the code, on the thank you and the questions, for
+   whoever would rather type it. Placed on its own rather than wrapped with
+   the code, so the code stays where it is on the cover: a margin in % runs
+   off the slide's width, as the code's own height does. The box is its own
+   container, so the type is sized off a share of the slide's width - cqw
+   alone would come out larger on the thank you, which has no padding */
+#deck-talk .slide .qr-url {
+  position: absolute;
+  left: 57%;
+  top: 50%;
+  width: 30%;
+  margin-top: 11.1%;
+  transform: translateX(-50%);
+  container-type: inline-size;
+  text-align: center;
+}
+
+#deck-talk .slide .qr-url a {
+  color: inherit;
+  text-decoration: none;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: max(11px, 3.7cqw);
+  white-space: nowrap;
+}
+
 /* ---------- the three owls ---------- */
 
 /* The slide after the cover is the drawing and nothing else, so it takes the
@@ -123,7 +162,7 @@
 }
 
 /* the component tree: taller than a figure's default, since it is the slide */
-.clean .figure.tree svg { max-height: 38cqw; }
+.clean .figure.tree svg { max-height: 34cqw; }
 
 /* a screenshot: the browser's own frame is not in the image, so the figure
    gives it an edge and a shadow to sit on */
@@ -144,6 +183,28 @@
   border-radius: 6px;
   box-shadow: 0 0.4cqw 1.2cqw rgba(0, 0, 0, 0.10);
 }
+
+/* a screenshot is the whole body: a little less air above it, so it can
+   reach the cap under a title and a lead without the slide overflowing */
+#deck-talk .slide-body:has(> .figure.shot) { margin-top: 2cqw; }
+
+/* the release notes: the link sits on the title's own line rather than
+   in a footer, so the screenshot keeps the full height of the shared cap
+   above with the lead under the title */
+#deck-talk .release-notes .title-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 3cqw;
+}
+
+#deck-talk .release-notes .doc-link {
+  color: var(--accent);
+  font-size: max(12px, calc(1.7cqw * var(--content-scale, 1)));
+  text-decoration: none;
+  border-bottom: 1px solid var(--accent-light);
+}
+
 
 /* ---------- this deck's tables ---------- */
 
@@ -244,25 +305,51 @@
   flex: 0 0 auto;
 }
 
-/* the three computations: the same cards, three across, and a numeral
-   where a shape has its constructor */
+/* the three computations: three columns rather than three cards, each a
+   numeral, a name, what it does and an example of it. The columns share
+   their rows, so the three examples start on one line whatever the text
+   above them runs to - and the whole grid sits in the middle of the body */
 #deck-talk .shape-grid.three {
   grid-template-columns: 1fr 1fr 1fr;
-  /* three short cards: as tall as the tallest of them, not as tall as the
-     slide, and held in the middle of the body rather than stretched down it */
   grid-auto-rows: auto;
   align-content: center;
+  gap: 0.6cqw 3.2cqw;
+}
+
+#deck-talk .shape-grid.three li {
+  position: relative;
+  display: grid;
+  grid-row: span 4;
+  grid-template-rows: subgrid;
+  row-gap: 0.6cqw;
+  padding: 0;
+  border: 0;
+  background: none;
+}
+
+/* a hairline down the middle of each gap, rather than a border on the
+   column, so the three code panels keep the same width */
+#deck-talk .shape-grid.three li + li::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -1.6cqw;
+  border-left: 1px solid var(--line);
+}
+
+#deck-talk .shape-grid.three .code-block {
+  min-width: 0;
+  margin-top: 1.2cqw;
 }
 
 #deck-talk .shape-grid .num {
   color: var(--accent);
-  font-size: max(9px, 1.15cqw);
+  font-size: max(9px, calc(1.15cqw * var(--content-scale, 1)));
   font-weight: 500;
   letter-spacing: 0.06em;
   font-variant-numeric: tabular-nums;
 }
-
-#deck-talk .shape-grid.three li { justify-content: flex-start; }
 
 #deck-talk .shape-grid li {
   display: flex;
@@ -277,14 +364,28 @@
 
 #deck-talk .shape-grid .shape {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: max(11px, 1.7cqw);
+  font-size: max(11px, calc(1.7cqw * var(--content-scale, 1)));
   color: var(--ink);
+}
+
+/* the collections lead with a whole line of code, not a bare constructor:
+   a size down, so the longest of them still fits its card */
+#deck-talk .shape-grid.collections .shape { font-size: max(10px, calc(1.45cqw * var(--content-scale, 1))); }
+
+/* proxy is the odd one out - deep where the four above are shallow - so it
+   takes a row of its own, the width of both */
+#deck-talk .shape-grid.collections .deep { grid-column: 1 / -1; }
+
+/* five cards where there were four: a little less air in each */
+#deck-talk .shape-grid.collections li {
+  gap: 0.4cqw;
+  padding: 1.2cqw 2.2cqw;
 }
 
 #deck-talk .shape-grid h3 {
   margin: 0;
   font-family: inherit;
-  font-size: max(11px, 1.5cqw);
+  font-size: max(11px, calc(1.5cqw * var(--content-scale, 1)));
   font-weight: 500;
   letter-spacing: -0.01em;
   text-transform: none;
@@ -294,8 +395,27 @@
 #deck-talk .shape-grid p {
   margin: 0;
   color: var(--quiet);
-  font-size: max(10px, 1.3cqw);
+  font-size: max(10px, calc(1.3cqw * var(--content-scale, 1)));
 }
+
+/* the computation graph: the component on the left, as tall as its code;
+   the graph it makes held level with it on the right */
+.clean .slide-body.two-col.fit > section.graph-side { align-self: center; }
+
+.clean .figure.deps svg { max-height: 28cqw; }
+
+/* one plugin depending on another: two cards and the arrow between them,
+   about as tall as the code panel beside it */
+.clean .figure.dep-pair svg { max-height: 26cqw; }
+
+/* the render, the one node that ends in the DOM: a light green, mixed into
+   the card so it holds in the dark theme too. No palette has a green. */
+.clean .figure.deps .ui {
+  fill: color-mix(in srgb, #3fa45b 16%, var(--card));
+  stroke: color-mix(in srgb, #3fa45b 50%, var(--border));
+}
+
+.clean .two-col > section > .code-block + h3.label { margin-top: 1.6cqw; }
 
 /* the shift: two trees, so the only thing that changes is where state sits */
 .clean .figure.shift svg { max-height: 34cqw; }
@@ -335,12 +455,55 @@
    deck name either. For the one-line claims that want the slide to themselves */
 .clean .slide.statement.bare .slide-head { border-bottom: 0; }
 
-/* the closing slide: the three toolkits side by side, read at a glance.
-   align-content: start because the boxes hold different amounts - centred,
-   the three headings land at three different heights */
-#deck-talk .rows.toolkit { --box-cols: 3; }
-#deck-talk .rows.toolkit li { align-content: start; }
+/* the closing slide: the three toolkits as a triangle - reactivity on
+   top, the other two under it, each set half a box out to its side. Ten
+   columns, four to a box, so the offsets fall on column lines */
+#deck-talk .rows.toolkit {
+  --box-cols: 10;
+  gap: 3cqw 1.4cqw;
+}
 
-/* one name list runs to two lines, the other two do not. Reserving the two
-   lines everywhere starts all three bodies on the same line */
-#deck-talk .rows.toolkit h3 { min-height: 2lh; }
+#deck-talk .rows.toolkit li { text-align: center; }
+
+#deck-talk .rows.toolkit li:nth-child(1) { grid-column: 4 / 8; }
+#deck-talk .rows.toolkit li:nth-child(2) { grid-column: 2 / 6; }
+#deck-talk .rows.toolkit li:nth-child(3) { grid-column: 6 / 10; }
+
+/* the state-management list: the column's whole subject, not a remark
+   under a title, so it takes a body size rather than a note's */
+#deck-talk .notes.large {
+  gap: 1.1cqw;
+  max-width: none;
+}
+
+#deck-talk .notes.large li {
+  padding-left: 2.2cqw;
+  font-size: max(14px, calc(2.1cqw * var(--content-scale, 1)));
+}
+
+#deck-talk .notes.large li::before {
+  top: 1.15cqw;
+  width: 0.6cqw;
+  height: 0.6cqw;
+}
+
+/* one code panel on its own: a column's width, held in the middle of the
+   slide rather than against its left edge */
+#deck-talk .slide-body.solo > section {
+  align-self: center;
+  width: 48%;
+}
+
+/* the four challenges, as a two-by-two of cards: the number on its own
+   line over the title, and the text from the top, so the four titles sit
+   level across each row */
+#deck-talk .rows.challenges li { align-content: start; }
+
+#deck-talk .rows.challenges .num {
+  display: block;
+  margin-bottom: 0.8cqw;
+}
+
+/* the signal's own API above the counter: one panel wide, so it sits over
+   counter.js instead of running the width of the slide */
+#deck-talk .walkthrough .slide-head .code-block { width: calc((100% - 4cqw) / 2); }
