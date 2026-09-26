@@ -516,38 +516,6 @@ price();          // 120</code></pre>
     </footer>
   </article>
 
-  <article class="slide" data-id="a2f00005" data-act="question">
-    <header class="slide-head">
-      <p class="eyebrow">Ground rules</p>
-      <h2>Signals can be watched</h2>
-    </header>
-    <div class="slide-body two-col even">
-      <section>
-        <h3 class="label"><code>computed</code> — produces a value</h3>
-<pre><code class="language-javascript">const total = computed(
-    () =&gt; price() * qty()
-);
-
-total();   // not a subscription
-           // read it like a signal</code></pre>
-<pre><code class="language-markup">&lt;!-- this is a subscription! --&gt;
-&lt;t t-out="this.total()"/&gt;</code></pre>
-      </section>
-      <section>
-        <h3 class="label">an effect — changes the world</h3>
-<pre><code class="language-javascript">effect(() =&gt; {
-    // this is a subscription!
-    console.log(total());
-});
-// runs now, and again whenever
-// what it read changes</code></pre>
-      </section>
-    </div>
-    <footer class="slide-foot">
-      <p><code>qty.set(3)</code> → <code>total</code> recomputes → the effect logs. <strong>And nothing else in the program ran.</strong></p>
-    </footer>
-  </article>
-
 
   <article class="slide" data-id="a2f00007" data-act="question">
     <header class="slide-head">
@@ -724,6 +692,36 @@ sum = computed(() =&gt;
     </div>
     <footer class="slide-foot">
       <p>A render is not a special case. It is a computation that happens to paint.</p>
+    </footer>
+  </article>
+
+  <article class="slide" data-id="a2f00005" data-act="graph">
+    <header class="slide-head">
+      <p class="eyebrow">Ground rules</p>
+      <h2>Signals (and computations) can be watched</h2>
+    </header>
+    <div class="slide-body two-col even">
+      <section>
+        <h3 class="label"><code>signal</code> — holds a value</h3>
+<pre><code class="language-javascript">const price = signal(100);
+
+price();   // not a subscription
+           // just a read</code></pre>
+<pre><code class="language-markup">&lt;!-- this is a subscription! --&gt;
+&lt;t t-out="this.price()"/&gt;</code></pre>
+      </section>
+      <section>
+        <h3 class="label">an effect — changes the world</h3>
+<pre><code class="language-javascript">effect(() =&gt; {
+    // this is a subscription!
+    console.log(price());
+});
+// runs now, and again whenever
+// what it read changes</code></pre>
+      </section>
+    </div>
+    <footer class="slide-foot">
+      <p><code>price.set(120)</code> → the effect logs, the template re-renders. <strong>And nothing else in the program ran.</strong></p>
     </footer>
   </article>
 
@@ -1028,65 +1026,6 @@ sum = computed(() =&gt;
     </div>
   </article>
 
-  <article class="slide" data-id="a2f00017" data-act="gate">
-    <header class="slide-head">
-      <p class="eyebrow">Laziness</p>
-      <h2>A computed nobody reads never runs</h2>
-      <p class="lead">Not "runs and throws the answer away". Does not run.</p>
-    </header>
-    <div class="slide-body two-col even">
-      <section>
-        <h3 class="label file">lazy.mjs</h3>
-<pre><code class="language-javascript">const s = signal(0);
-const lazy = computed(() =&gt; { runs++; return s() * 2; });
-
-s.set(1);
-s.set(2);
-s.set(3);
-await tick();
-// runs so far?
-
-lazy();   // 6</code></pre>
-      </section>
-      <section>
-        <h3 class="label">output</h3>
-<pre><code class="language-javascript">recomputes before first read: <mark>0</mark>
-value: 6 | recomputes after read: <mark>1</mark></code></pre>
-        <ul class="rows wide-key">
-          <li><span class="key">Why</span><span>A write marks observers stale. Marking is not computing.</span></li>
-          <li><span class="key">So</span><span>A screen you are not looking at costs nothing, even while its data churns.</span></li>
-        </ul>
-      </section>
-    </div>
-    <footer class="slide-foot">
-      <p>An effect is the exception: it has no value to pull, so it runs on its own. Effects are the roots that drive everything.</p>
-    </footer>
-  </article>
-
-  <article class="slide" data-id="a2f0017c" data-act="gate">
-    <header class="slide-head">
-      <p class="eyebrow">Laziness</p>
-      <h2>Reads outside a computation are free</h2>
-      <p class="lead">A read subscribes whatever computation is running. In an event handler, none is.</p>
-    </header>
-    <div class="slide-body solo">
-      <section>
-        <h3 class="label file">counter.js</h3>
-<pre><code class="language-javascript">class Counter extends Component {
-    static template = "my_module.Counter";
-
-    value = signal(0);
-
-    onClick() {
-        // no computation running here:
-        // reads the value, subscribes nothing
-        console.log(<mark>this.value()</mark>);
-    }
-}</code></pre>
-      </section>
-    </div>
-  </article>
-
   <article class="slide" data-id="a2f00018" data-act="gate">
     <header class="slide-head">
       <p class="eyebrow">The gate</p>
@@ -1144,6 +1083,65 @@ n.set(-1); await tick();</code></pre>
     <footer class="slide-foot">
       <p><code>Object.is</code> by default. Pass <code>equals: false</code> to notify on every write, for a value you mutate in place.</p>
     </footer>
+  </article>
+
+  <article class="slide" data-id="a2f00017" data-act="gate">
+    <header class="slide-head">
+      <p class="eyebrow">Laziness</p>
+      <h2>A computed nobody reads never runs</h2>
+      <p class="lead">Not "runs and throws the answer away". Does not run.</p>
+    </header>
+    <div class="slide-body two-col even">
+      <section>
+        <h3 class="label file">lazy.mjs</h3>
+<pre><code class="language-javascript">const s = signal(0);
+const lazy = computed(() =&gt; { runs++; return s() * 2; });
+
+s.set(1);
+s.set(2);
+s.set(3);
+await tick();
+// runs so far?
+
+lazy();   // 6</code></pre>
+      </section>
+      <section>
+        <h3 class="label">output</h3>
+<pre><code class="language-javascript">recomputes before first read: <mark>0</mark>
+value: 6 | recomputes after read: <mark>1</mark></code></pre>
+        <ul class="rows wide-key">
+          <li><span class="key">Why</span><span>A write marks observers stale. Marking is not computing.</span></li>
+          <li><span class="key">So</span><span>A screen you are not looking at costs nothing, even while its data churns.</span></li>
+        </ul>
+      </section>
+    </div>
+    <footer class="slide-foot">
+      <p>An effect is the exception: it has no value to pull, so it runs on its own. Effects are the roots that drive everything.</p>
+    </footer>
+  </article>
+
+  <article class="slide" data-id="a2f0017c" data-act="gate">
+    <header class="slide-head">
+      <p class="eyebrow">Laziness</p>
+      <h2>Reads outside a computation are free</h2>
+      <p class="lead">A read subscribes whatever computation is running. In an event handler, none is.</p>
+    </header>
+    <div class="slide-body solo">
+      <section>
+        <h3 class="label file">counter.js</h3>
+<pre><code class="language-javascript">class Counter extends Component {
+    static template = "my_module.Counter";
+
+    value = signal(0);
+
+    onClick() {
+        // no computation running here:
+        // reads the value, subscribes nothing
+        console.log(<mark>this.value()</mark>);
+    }
+}</code></pre>
+      </section>
+    </div>
   </article>
 
   <article class="slide" data-id="a2f00019" data-act="gate">
